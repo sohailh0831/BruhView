@@ -73,7 +73,7 @@ router.post('/register',(req,res)=>{
 
           if(results.length == 0){
           let userid = uuidv4();
-          con.query(`INSERT INTO users (id,username, password, firstname, lastname) VALUES (${mysql.escape(userid)}, ${mysql.escape(req.body.password)}, ${mysql.escape(req.body.firstname)}, ${mysql.escape(req.body.lastname)});`, (error, results, fields) => {
+          con.query(`INSERT INTO users (id,username, password, firstname, lastname) VALUES (${mysql.escape(userid)}, ${mysql.escape(username)}, ${mysql.escape(req.body.password)}, ${mysql.escape(req.body.firstname)}, ${mysql.escape(req.body.lastname)});`, (error, results, fields) => {
             if (error) {
             console.log(error.stack);
             con.end();
