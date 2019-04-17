@@ -15,7 +15,7 @@ var request = require("request");
 const mysql = require('mysql');
 const moment = require('moment');
 let dbInfo = {
-  host: "localhost",
+  host: "134.209.4.10",
   user: "root",
   password: "cs252project!",
   database : 'BruhView'
@@ -36,6 +36,45 @@ router.get('/login', (req, res) => {
     success: req.flash('success'),
   });
 });
+
+
+router.post('/login',(req,res) => {
+      let username = req.body.username;
+      let password = req.body.password;
+
+      req.checkBody('username', 'Username field is required.').notEmpty();
+      req.checkBody('password', 'Password field is required.').notEmpty();
+
+      let formErrors = req.validationErrors();
+        if (formErrors) {
+            req.flash('error', formErrors[0].msg);
+            return res.redirect('/login');
+        }
+
+        let con = mysql.createConnection(dbInfo);
+
+        con.query(`SELECT * FROM users WHERE username=${mysql.escape(req.body.username)} AND password=${mysql.escape(req.body.password)};`, (error, results, fields) => {
+          if (error) {
+            console.log(error.stack);
+            con.end();
+            return res.send();
+          }
+
+
+            if(results.length == 0){
+              con.end();
+              req.flash('success', 'Username or Password are incorrect');
+              return res.redirect('/login');
+            } // user not found
+
+            con.end();
+            req.flash('success', 'Successfully Logged In');
+            return res.redirect('/dashboard');
+
+        });
+});
+
+
 
 router.get('/register', (req, res) => {
     return res.render('platform/register.hbs', {
