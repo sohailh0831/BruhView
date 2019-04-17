@@ -15,7 +15,7 @@ var request = require("request");
 const mysql = require('mysql');
 const moment = require('moment');
 let dbInfo = {
-  host: "134.209.4.10",
+  host: "localhost",
   user: "root",
   password: "cs252project!",
   database : 'BruhView'
