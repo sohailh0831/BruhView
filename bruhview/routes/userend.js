@@ -180,5 +180,13 @@ router.post('/register',(req,res)=>{
 
 });
 
+passport.serializeUser(function (uuid, done) {
+	done(null, uuid);
+});
+
+passport.deserializeUser(function (uuid, done) {
+  done(null, uuid);
+});
+
 
 module.exports = router;
