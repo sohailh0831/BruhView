@@ -31,4 +31,13 @@ router.get('/dashboard', (req, res) => {
 });
 
 
+router.get('/login', (req, res) => {
+    return res.render('platform/login.hbs', {
+    error: req.flash('error'),
+    success: req.flash('success'),
+  });
+    console.log("here");
+});
+
+
 module.exports = router;
