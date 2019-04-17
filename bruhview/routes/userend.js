@@ -22,7 +22,7 @@ let dbInfo = {
 };
 
 const LocalStrategy = require('passport-local').Strategy;
-const AuthenticationFunctions = require('/Authentication');
+const AuthenticationFunctions = require('../Authentication.js');
 
 
 router.get('/dashboard', (req, res) => {
