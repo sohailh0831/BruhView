@@ -21,6 +21,9 @@ let dbInfo = {
   database : 'BruhView'
 };
 
+const LocalStrategy = require('passport-local').Strategy;
+const AuthenticationFunctions = require('/Authentication');
+
 
 router.get('/dashboard', (req, res) => {
     return res.render('platform/dashboard.hbs', {
@@ -37,42 +40,71 @@ router.get('/login', (req, res) => {
   });
 });
 
+router.post('/login', AuthenticationFunctions.ensureNotAuthenticated, passport.authenticate('local', { successRedirect: '/dashboard', failureRedirect: '/login', failureFlash: true }), (req, res) => {
+  res.redirect('/dashboard');
+});
 
+/*
 router.post('/login',(req,res) => {
       let username = req.body.username;
       let password = req.body.password;
-
       req.checkBody('username', 'Username field is required.').notEmpty();
       req.checkBody('password', 'Password field is required.').notEmpty();
-
       let formErrors = req.validationErrors();
         if (formErrors) {
             req.flash('error', formErrors[0].msg);
             return res.redirect('/login');
         }
-
         let con = mysql.createConnection(dbInfo);
-
         con.query(`SELECT * FROM users WHERE username=${mysql.escape(req.body.username)} AND password=${mysql.escape(req.body.password)};`, (error, results, fields) => {
           if (error) {
             console.log(error.stack);
             con.end();
             return res.send();
           }
-
-
             if(results.length == 0){
               con.end();
               req.flash('success', 'Username or Password are incorrect');
               return res.redirect('/login');
             } // user not found
-
             con.end();
             req.flash('success', 'Successfully Logged In');
             return res.redirect('/dashboard');
-
         });
 });
+*/
+passport.use(new LocalStrategy({passReqToCallback: true,},
+	function (req, username, password, done) {
+      let con = mysql.createConnection(dbInfo);
+      con.query(`SELECT * FROM users WHERE username=${mysql.escape(username)};`, (error, results, fields) => {
+        if (error) {
+          console.log(error.stack);
+          con.end();
+          return;
+        }
+        if (results.length === 0) {
+          con.end();
+          return done(null, false, req.flash('error', 'Username or Password is incorrect.'));
+        } else {
+            if (bcrypt.compareSync(password, results[0].password)) {
+              console.log(`${username} successfully logged in.`);
+              let user = {
+                  identifier: results[0].id,
+                  username: results[0].username,
+                  firstName: results[0].firstname,
+                  lastName: results[0].lastname,
+              };
+              con.end();
+              return done(null, user);
+            } else {
+              con.end();
+              return done(null, false, req.flash('error', 'Username or Password is incorrect.'));
+            }
+
+        }
+      });
+
+}));
 
 
 
@@ -112,7 +144,9 @@ router.post('/register',(req,res)=>{
 
           if(results.length == 0){
           let userid = uuidv4();
-          con.query(`INSERT INTO users (id,username, password, firstname, lastname) VALUES (${mysql.escape(userid)}, ${mysql.escape(username)}, ${mysql.escape(req.body.password)}, ${mysql.escape(req.body.firstname)}, ${mysql.escape(req.body.lastname)});`, (error, results, fields) => {
+          let salt = bcrypt.genSaltSync(10);
+          let hashedPassword = bcrypt.hashSync(req.body.password,salt);
+          con.query(`INSERT INTO users (id,username, password, firstname, lastname) VALUES (${mysql.escape(userid)}, ${mysql.escape(username)}, ${hashedPassword}, ${mysql.escape(req.body.firstname)}, ${mysql.escape(req.body.lastname)});`, (error, results, fields) => {
             if (error) {
             console.log(error.stack);
             con.end();
