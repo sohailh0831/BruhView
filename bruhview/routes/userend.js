@@ -146,7 +146,7 @@ router.post('/register',(req,res)=>{
           let userid = uuidv4();
           let salt = bcrypt.genSaltSync(10);
           let hashedPassword = bcrypt.hashSync(req.body.password,salt);
-          con.query(`INSERT INTO users (id,username, password, firstname, lastname) VALUES (${mysql.escape(userid)}, ${mysql.escape(username)}, ${hashedPassword}, ${mysql.escape(req.body.firstname)}, ${mysql.escape(req.body.lastname)});`, (error, results, fields) => {
+          con.query(`INSERT INTO users (id,username, password, firstname, lastname) VALUES (${mysql.escape(userid)}, ${mysql.escape(username)}, '${hashedPassword}', ${mysql.escape(req.body.firstname)}, ${mysql.escape(req.body.lastname)});`, (error, results, fields) => {
             if (error) {
             console.log(error.stack);
             con.end();
