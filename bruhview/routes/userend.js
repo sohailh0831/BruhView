@@ -21,7 +21,7 @@ let dbInfo = {
   database : 'BruhView'
 };
 
-console.log("HH");
+
 router.get('/dashboard', (req, res) => {
     return res.render('platform/dashboard.hbs', {
     error: req.flash('error'),
