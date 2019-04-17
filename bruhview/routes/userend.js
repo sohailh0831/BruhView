@@ -27,7 +27,6 @@ router.get('/dashboard', (req, res) => {
     error: req.flash('error'),
     success: req.flash('success'),
   });
-    console.log("here");
 });
 
 
@@ -36,7 +35,13 @@ router.get('/login', (req, res) => {
     error: req.flash('error'),
     success: req.flash('success'),
   });
-    console.log("here");
+});
+
+router.get('/register', (req, res) => {
+    return res.render('platform/register.hbs', {
+    error: req.flash('error'),
+    success: req.flash('success'),
+  });
 });
 
 
