@@ -25,7 +25,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const AuthenticationFunctions = require('../Authentication.js');
 
 
-router.get('/dashboard', (req, res) => {
+router.get('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
     return res.render('platform/dashboard.hbs', {
     error: req.flash('error'),
     success: req.flash('success'),
@@ -33,7 +33,7 @@ router.get('/dashboard', (req, res) => {
 });
 
 
-router.get('/login', (req, res) => {
+router.get('/login',AuthenticationFunctions.ensureNotAuthenticated, (req, res) => {
     return res.render('platform/login.hbs', {
     error: req.flash('error'),
     success: req.flash('success'),
@@ -108,14 +108,14 @@ passport.use(new LocalStrategy({passReqToCallback: true,},
 
 
 
-router.get('/register', (req, res) => {
+router.get('/register', AuthenticationFunctions.ensureNotAuthenticated,(req, res) => {
     return res.render('platform/register.hbs', {
     error: req.flash('error'),
     success: req.flash('success'),
   });
 });
 
-router.post('/register',(req,res)=>{
+router.post('/register',AuthenticationFunctions.ensureNotAuthenticated,(req,res)=>{
   let firstname = req.body.firstname;
   let lastname = req.body.lastname;
   let username = req.body.username;
@@ -178,6 +178,12 @@ router.post('/register',(req,res)=>{
     }); //initial query
 
 
+});
+
+router.get('/logout', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
+  req.logout();
+  req.session.destroy();
+  return res.redirect('/login');
 });
 
 passport.serializeUser(function (uuid, done) {
