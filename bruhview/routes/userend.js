@@ -115,6 +115,13 @@ router.get('/register', AuthenticationFunctions.ensureNotAuthenticated,(req, res
   });
 });
 
+router.get('/register', AuthenticationFunctions.ensureAuthenticated,(req, res) => {
+    return res.render('platform/registeradmin.hbs', {
+    error: req.flash('error'),
+    success: req.flash('success'),
+  });
+});
+
 router.post('/register',AuthenticationFunctions.ensureNotAuthenticated,(req,res)=>{
   let firstname = req.body.firstname;
   let lastname = req.body.lastname;
@@ -180,8 +187,6 @@ router.post('/register',AuthenticationFunctions.ensureNotAuthenticated,(req,res)
 
 });
 
-
-
 router.post('/registeradmin',AuthenticationFunctions.ensureAuthenticated,(req,res)=>{
   let firstname = req.body.firstname;
   let lastname = req.body.lastname;
@@ -198,7 +203,7 @@ router.post('/registeradmin',AuthenticationFunctions.ensureAuthenticated,(req,re
     let formErrors = req.validationErrors();
       if (formErrors) {
   		    req.flash('error', formErrors[0].msg);
-          return res.redirect('/register');
+          return res.redirect('/registeradmin');
   	  }
 
       let con = mysql.createConnection(dbInfo);
