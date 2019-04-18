@@ -180,6 +180,76 @@ router.post('/register',AuthenticationFunctions.ensureNotAuthenticated,(req,res)
 
 });
 
+
+
+router.post('/registeradmin',AuthenticationFunctions.ensureAuthenticated,(req,res)=>{
+  let firstname = req.body.firstname;
+  let lastname = req.body.lastname;
+  let username = req.body.username;
+  let password = req.body.password;
+
+    req.checkBody('firstname', 'First Name field is required.').notEmpty();
+    req.checkBody('lastname', 'Last Name field is required.').notEmpty();
+    req.checkBody('username', 'Username field is required.').notEmpty();
+    req.checkBody('password', 'New Password field is required.').notEmpty();
+    req.checkBody('repassword', 'Confirm New password field is required.').notEmpty();
+	  req.checkBody('repassword', 'New password does not match confirmation password field.').equals(req.body.password);
+
+    let formErrors = req.validationErrors();
+      if (formErrors) {
+  		    req.flash('error', formErrors[0].msg);
+          return res.redirect('/register');
+  	  }
+
+      let con = mysql.createConnection(dbInfo);
+      con.query(`SELECT * FROM users WHERE username=${mysql.escape(req.body.username)};`, (error, results, fields) => { //checks to see if username is already taken
+          if (error) {
+            console.log(error.stack);
+            con.end();
+            return res.send();
+          }
+
+          if(results.length == 0){
+          let userid = uuidv4();
+          let salt = bcrypt.genSaltSync(10);
+          let hashedPassword = bcrypt.hashSync(req.body.password,salt);
+          con.query(`INSERT INTO users (id,username, password, firstname, lastname,admin) VALUES (${mysql.escape(userid)}, ${mysql.escape(username)}, '${hashedPassword}', ${mysql.escape(req.body.firstname)}, ${mysql.escape(req.body.lastname)},${mysql.escape('1')});`, (error, results, fields) => {
+            if (error) {
+            console.log(error.stack);
+            con.end();
+            return;
+          }
+          if (results) {
+            console.log(`${req.body.email} successfully registered.`);
+            con.end();
+            req.flash('success', 'Successfully registered Admin Account. You may now login.');
+            return res.redirect('/login');
+          }
+          else {
+            con.end();
+            req.flash('error', 'Something Went Wrong. Try Registering Again.');
+            return res.redirect('/registeradmin');
+          }
+
+
+      });
+    }
+    else{
+      con.end();
+      req.flash('error', 'Username is already taken');
+      return res.redirect('/registeradmin');
+
+    }
+    }); //initial query
+});
+
+
+
+
+
+
+
+
 router.get('/logout', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
   req.logout();
   req.session.destroy();
