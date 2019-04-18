@@ -115,7 +115,7 @@ router.get('/register', AuthenticationFunctions.ensureNotAuthenticated,(req, res
   });
 });
 
-router.get('/register', AuthenticationFunctions.ensureAuthenticated,(req, res) => {
+router.get('/registeradmin', AuthenticationFunctions.ensureAuthenticated,(req, res) => {
     return res.render('platform/registeradmin.hbs', {
     error: req.flash('error'),
     success: req.flash('success'),
