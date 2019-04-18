@@ -207,7 +207,7 @@ router.post('/registeradmin',AuthenticationFunctions.ensureAuthenticated,(req,re
   	  }
 
       let con = mysql.createConnection(dbInfo);
-      con.query(`SELECT * FROM user WHERE username=${req.user.id} AND admin='1');`,(error,results,fields) =>{
+      con.query(`SELECT * FROM user WHERE username=${req.user.id} AND admin='1';`,(error,results,fields) =>{
         if (error) {
           console.log(error.stack);
           con.end();
@@ -218,7 +218,7 @@ router.post('/registeradmin',AuthenticationFunctions.ensureAuthenticated,(req,re
           req.flash('error', 'Only Admin Accounts can add Admin Accounts.');
           return res.redirect('/dashboard');
         }
-      }
+      });
 
       con.query(`SELECT * FROM users WHERE username=${mysql.escape(req.body.username)};`, (error, results, fields) => { //checks to see if username is already taken
           if (error) {
