@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        function search() {
+            // Search movie requested by user
+            var start = "http://www.omdbapi.com/?t=";
+            var searchTitle = document.getElementById("SearchBar").value;
+            var key = "&apikey=f0e99e3";
+            var apiSearchWithKey = start.concat(searchTitle, key);
+            alert(apiSearchWithKey);
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("GET", apiSearchWithKey, false);
+            xmlHttp.send(null);
+            var response = xmlHttp.responseText;
+
+            // Parse info
+            var obj = JSON.parse(response);
+            var title = obj.Title;
+            var year = obj.Year;
+            var genre = obj.Genre;
+            var director = obj.Director;
+
+            var titleSpan = document.getElementById('TitleValue');
+            titleSpan.textContent = title;
+
+            var yearSpan = document.getElementById('YearValue');
+            yearSpan.textContent = year;
+
+            var genreSpan = document.getElementById('GenreValue');
+            genreSpan.textContent = genre;
+
+            var directorSpan = document.getElementById('DirectorValue');
+            directorSpan.textContent = director;
+        }
+    </script>
+
+    <meta charset="UTF-8">
+    <title>Search</title>
+</head>
+<body>
+    <form>
+        Search: <input type="text" id="SearchBar"><br>
+        <input name="searchClick" onclick="search()" type="button" value="Search"><br>
+    </form>
+
+    <p>
+        Title: <span id="TitleValue"></span>
+    </p>
+
+    <p>
+        Year: <span id="YearValue"></span>
+    </p>
+
+    <p>
+        Genre: <span id="GenreValue"></span>
+    </p>
+
+    <p>
+        Director: <span id="DirectorValue"></span>
+    </p>
+</body>
+</html>
