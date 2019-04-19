@@ -22,11 +22,6 @@ let dbInfo = {
   database : 'BruhView'
 };
 
-
-app.use(session({ secret: 'somekey' }));
-app.use(passport.initialize());
-app.use(passport.session());
-
 const LocalStrategy = require('passport-local').Strategy;
 const AuthenticationFunctions = require('../Authentication.js');
 
