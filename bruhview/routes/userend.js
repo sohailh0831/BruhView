@@ -25,8 +25,16 @@ let dbInfo = {
 const LocalStrategy = require('passport-local').Strategy;
 const AuthenticationFunctions = require('../Authentication.js');
 
-
+/*
 router.get('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
+    return res.render('platform/dashboard.hbs', {
+    error: req.flash('error'),
+    success: req.flash('success'),
+  });
+});
+*/
+
+router.get('/dashboard',(req, res) => {
     return res.render('platform/dashboard.hbs', {
     error: req.flash('error'),
     success: req.flash('success'),
