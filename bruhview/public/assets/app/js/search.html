@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        function search() {
+            var start = "http://www.omdbapi.com/?t=";
+            var searchTitle = document.getElementById("SearchBar").value;
+            var key = "&apikey=f0e99e3";
+
+            var apiSearchWithKey = start.concat(searchTitle, key);
+            alert(apiSearchWithKey);
+
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("GET", apiSearchWithKey, false);
+            xmlHttp.send(null);
+            alert(xmlHttp.responseText);
+        }
+    </script>
+
+    <meta charset="UTF-8">
+    <title>Search</title>
+</head>
+<body>
+    <form>
+        Search: <input type="text" id="SearchBar"><br>
+        <input name="searchClick" onclick="search()" type="button" value="Search"><br>
+    </form>
+</body>
+</html>
