@@ -89,7 +89,8 @@ router.post('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res
     var genre;
     var director;
     var imdbID;
-    request(apiSearchWithKey, function(error, response, body) {
+
+    request(apiSearchWithKey, function (error, response, body) {
         // Parse info
         obj = JSON.parse(body);
         title = obj.Title;
@@ -98,30 +99,45 @@ router.post('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res
         director = obj.Director;
         imdbID = obj.imdbID;
 
+        if(typeof imdbID == "undefined") {
+            console.log("IMDB API failed to find a movie with this title");
+            return res.redirect('/dashboard');
+        }
+
         // Add API results to database
         let con = mysql.createConnection(dbInfo);
-                // Make new movie
-                con.query(`INSERT INTO movies (imdbID, title, year, genre, director) VALUES (${mysql.escape(imdbID)}, ${mysql.escape(title)}, '${year}', ${mysql.escape(genre)}, ${mysql.escape(director)});`, (error, results, fields) => {
-                    if (error) {
-                        console.log(error.stack);
-                        con.end();
-                        return;
-                    }
-                    if (results) {
-                        console.log(`${title} successfully added movie to database.`);
-                        con.end();
-                        req.flash('success', 'sucessfully added to database');
-                        return res.redirect('/searchresult');
-                    } else {
-                        con.end();
-                        req.flash('error', 'Something Went Wrong. Try Searching Again.');
-                        return res.redirect('/dashboard');
-                    }
-                });
+        // Check if movie already exists in database
+        con.query(`SELECT * FROM movies WHERE imdbID=${mysql.escape(imdbID)};`, (error, results, fields) => {
+            if (error) {
+                console.log(error.stack);
+                con.end();
+                return;
+            }
 
+            if (results.length === 0) {
+                // Make new movie
+                console.log('Movie does not already exist in database');
+                con.query(`INSERT INTO movies (imdbID, title, year, genre, director) VALUES (${mysql.escape(imdbID)}, ${mysql.escape(title)}, '${year}', ${mysql.escape(genre)}, ${mysql.escape(director)});`, (error, results, fields) => {
+
+                    //if (error) {
+                    //    console.log(error.stack);
+                    //    con.end();
+                    //    return;
+                    //}
+
+                    console.log(`${title} successfully added movie to database.`);
+                    con.end();
+                    req.flash('success', 'sucessfully added to database');
+                    return res.redirect('/searchresult');
+                });
+            }
+            else {
+                console.log('Movie already exists in database');
+                return res.redirect('/searchresult');
+            }
+        });
 
     });
-
 });
 
 
