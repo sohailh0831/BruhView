@@ -57,6 +57,18 @@ router.get('/dashboard',AuthenticationFunctions.ensureAuthenticated,(req, res) =
     success: req.flash('success'),
   });
 });
+router.get('/settings',AuthenticationFunctions.ensureAuthenticated,(req, res) => {
+  return res.render('platform/settings.hbs', {
+  error: req.flash('error'),
+  success: req.flash('success'),
+});
+});
+router.get('/reviews',AuthenticationFunctions.ensureAuthenticated,(req, res) => {
+  return res.render('platform/reviews.hbs', {
+  error: req.flash('error'),
+  success: req.flash('success'),
+});
+});
 
 
 router.post('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
