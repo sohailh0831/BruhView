@@ -42,11 +42,62 @@ router.get('/dashboard',(req, res) => {
 });
 
 
+router.post('/dashboard', (req, res) => {
+    let searchTitle = req.body.memoInput;
+    console.log("Search title is next line");
+    console.log(searchTitle);
+
+    // Search movie requested by user
+    var start = "http://www.omdbapi.com/?t=";
+    var key = "&apikey=f0e99e3";
+    var apiSearchWithKey = start.concat(searchTitle, key);
+    console.log(apiSearchWithKey);
+
+    const request = require('request');
+
+    request(apiSearchWithKey, function(error, response, body) {
+        // Parse info
+        var obj = JSON.parse(body);
+        var title = obj.Title;
+        var year = obj.Year;
+        var genre = obj.Genre;
+        var director = obj.Director;
+
+        console.log(title);
+        console.log(year);
+        console.log(genre);
+        console.log(director);
+    });
+
+    return res.render('platform/searchresult.hbs', {
+        error: req.flash('error'),
+        success: req.flash('success'),
+    });
+});
+
+
 router.get('/login',AuthenticationFunctions.ensureNotAuthenticated, (req, res) => {
     return res.render('platform/login.hbs', {
     error: req.flash('error'),
     success: req.flash('success'),
   });
+});
+
+router.get('/searchresult', (req, res) => {
+
+    return res.render('platform/searchresult.hbs', {
+        error: req.flash('error'),
+        success: req.flash('success'),
+    });
+});
+
+router.post('/searchresult', (req, res) => {
+    let memoinput = req.body.memoInput;
+
+    return res.render('platform/searchresult.hbs', {
+        error: req.flash('error'),
+        success: req.flash('success'),
+    });
 });
 
 router.post('/login', AuthenticationFunctions.ensureNotAuthenticated, passport.authenticate('local', { successRedirect: '/dashboard', failureRedirect: '/login', failureFlash: true }), (req, res) => {
