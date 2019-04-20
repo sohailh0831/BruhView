@@ -44,7 +44,14 @@ router.get('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res)
 });
 */
 
-router.get('/dashboard',(req, res) => {
+router.get('/',AuthenticationFunctions.ensureAuthenticated,(req, res) => {
+    return res.render('platform/dashboard.hbs', {
+    error: req.flash('error'),
+    success: req.flash('success'),
+  });
+});
+
+router.get('/dashboard',AuthenticationFunctions.ensureAuthenticated,(req, res) => {
     return res.render('platform/dashboard.hbs', {
     error: req.flash('error'),
     success: req.flash('success'),
@@ -52,7 +59,7 @@ router.get('/dashboard',(req, res) => {
 });
 
 
-router.post('/dashboard', (req, res) => {
+router.post('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
     let searchTitle = req.body.memoInput;
     console.log("Search title is next line");
     console.log(searchTitle);
