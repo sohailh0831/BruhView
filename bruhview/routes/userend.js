@@ -57,6 +57,18 @@ router.get('/dashboard',AuthenticationFunctions.ensureAuthenticated,(req, res) =
     success: req.flash('success'),
   });
 });
+router.get('/settings',AuthenticationFunctions.ensureAuthenticated,(req, res) => {
+  return res.render('platform/settings.hbs', {
+  error: req.flash('error'),
+  success: req.flash('success'),
+});
+});
+router.get('/reviews',AuthenticationFunctions.ensureAuthenticated,(req, res) => {
+  return res.render('platform/reviews.hbs', {
+  error: req.flash('error'),
+  success: req.flash('success'),
+});
+});
 
 
 router.post('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
@@ -201,6 +213,42 @@ router.get('/register', AuthenticationFunctions.ensureNotAuthenticated,(req, res
   });
 });
 
+
+router.get('/sampleinput', AuthenticationFunctions.ensureAuthenticated,(req, res) => {
+  let con = mysql.createConnection(dbInfo);
+
+    con.query(`SELECT * FROM users WHERE id=${mysql.escape(req.user.identifier)};`, (error, user, fields) => {
+      if (error) {
+          console.log(error.stack);
+          con.end();
+          return res.send();
+      }
+      con.end();
+      return res.render('platform/sampleinput.hbs', {
+        testin: user[0].testInput,
+      });
+    });
+});
+
+router.post('/sampleinput', AuthenticationFunctions.ensureAuthenticated,(req, res) => {
+  let con = mysql.createConnection(dbInfo);
+
+  let t = req.body.testInput;
+  con.query(`UPDATE users SET testInput = ${mysql.escape(t)} WHERE users.id = ${mysql.escape(req.user.identifier)};`, (error, results, fields) => {
+  if (error) {
+      console.log(error.stack);
+      con.end();
+      return res.send();
+  }
+  con.end();
+  req.flash('success', 'test input successfully updated!!');
+  return res.redirect('/sampleinput');
+  });
+
+
+});
+
+
 router.get('/registeradmin', AuthenticationFunctions.ensureAuthenticated,(req, res) => {
     return res.render('platform/registeradmin.hbs', {
     error: req.flash('error'),
@@ -293,24 +341,18 @@ router.post('/registeradmin',AuthenticationFunctions.ensureAuthenticated,(req,re
   	  }
 
       let con = mysql.createConnection(dbInfo);
-      con.query(`SELECT * FROM user WHERE user=${mysql.escape(req.user.identifier)};`,(error,results,fields) =>{
+      con.query(`SELECT * FROM users WHERE id=${mysql.escape(req.user.identifier)};`,(error,results,fields) =>{
         if (error) {
           console.log(error.stack);
           con.end();
           return res.send();
         }
-        if(results.length ==0){
+   if(results[0].admin != '1'){
           con.end();
           req.flash('error', 'Only Admin Accounts can add Admin Accounts.');
           return res.redirect('/dashboard');
         }
-        if(results[0].admin != '1'){
-          con.end();
-          req.flash('error', 'Only Admin Accounts can add Admin Accounts.');
-          return res.redirect('/dashboard');
-        }
-      });
-
+    else{
       con.query(`SELECT * FROM users WHERE username=${mysql.escape(req.body.username)};`, (error, results, fields) => { //checks to see if username is already taken
           if (error) {
             console.log(error.stack);
@@ -350,6 +392,8 @@ router.post('/registeradmin',AuthenticationFunctions.ensureAuthenticated,(req,re
 
     }
     }); //initial query
+}
+        });
 });
 
 
