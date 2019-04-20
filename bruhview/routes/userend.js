@@ -60,9 +60,8 @@ router.get('/dashboard',AuthenticationFunctions.ensureAuthenticated,(req, res) =
 
 
 router.post('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
-    let searchTitle = req.body.memoInput;
-    console.log("Search title is next line");
-    console.log(searchTitle);
+    //ROUTER POST
+    let searchTitle = req.body.searchTitle;
 
     // Search movie requested by user
     var start = "http://www.omdbapi.com/?t=";
@@ -71,7 +70,6 @@ router.post('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res
     console.log(apiSearchWithKey);
 
     const request = require('request');
-
     request(apiSearchWithKey, function(error, response, body) {
         // Parse info
         var obj = JSON.parse(body);
@@ -79,16 +77,49 @@ router.post('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res
         var year = obj.Year;
         var genre = obj.Genre;
         var director = obj.Director;
+        var imdbID = obj.imdbID;
 
         console.log(title);
         console.log(year);
         console.log(genre);
         console.log(director);
+        console.log(imdbID);
     });
 
-    return res.render('platform/searchresult.hbs', {
-        error: req.flash('error'),
-        success: req.flash('success'),
+    // Add API results to database
+    let con = mysql.createConnection(dbInfo);
+    con.query(`SELECT * FROM movies WHERE imdbID=${mysql.escape(imdbID)};`, (error, results, fields) => { //checks to see if username is already taken
+        if (error) {
+            console.log(error.stack);
+            con.end();
+            return res.send();
+        }
+
+        if (results.length == 0) {
+            // Make new movie
+            con.query(`INSERT INTO movies (imdbID, title, year, genre, director) VALUES (${mysql.escape(imdbID)}, ${mysql.escape(title)}, '${year}', ${mysql.escape(genre)}, ${mysql.escape(director)});`, (error, results, fields) => {
+                if (error) {
+                    console.log(error.stack);
+                    con.end();
+                    return;
+                }
+                if (results) {
+                    console.log(`${title} successfully added movie to database.`);
+                    con.end();
+                    req.flash('success', 'sucessfully added to database');
+                    return res.redict('/searchresult');
+                } else {
+                    con.end();
+                    req.flash('error', 'Something Went Wrong. Try Searching Again.');
+                    return res.redirect('/dashboard');
+                }
+            });
+        } else {
+            con.end();
+            req.flash('error', 'Movie already exists');
+            return res.redirect('/searchresult');
+
+        }
     });
 });
 
