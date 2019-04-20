@@ -72,9 +72,8 @@ router.get('/reviews',AuthenticationFunctions.ensureAuthenticated,(req, res) => 
 
 
 router.post('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
-    let searchTitle = req.body.memoInput;
-    console.log("Search title is next line");
-    console.log(searchTitle);
+    //ROUTER POST
+    let searchTitle = req.body.searchTitle;
 
     // Search movie requested by user
     var start = "http://www.omdbapi.com/?t=";
@@ -84,23 +83,60 @@ router.post('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res
 
     const request = require('request');
 
-    request(apiSearchWithKey, function(error, response, body) {
+    var obj;
+    var title;
+    var year;
+    var genre;
+    var director;
+    var imdbID;
+
+    request(apiSearchWithKey, function (error, response, body) {
         // Parse info
-        var obj = JSON.parse(body);
-        var title = obj.Title;
-        var year = obj.Year;
-        var genre = obj.Genre;
-        var director = obj.Director;
+        obj = JSON.parse(body);
+        title = obj.Title;
+        year = obj.Year;
+        genre = obj.Genre;
+        director = obj.Director;
+        imdbID = obj.imdbID;
 
-        console.log(title);
-        console.log(year);
-        console.log(genre);
-        console.log(director);
-    });
+        if(typeof imdbID == "undefined") {
+            console.log("IMDB API failed to find a movie with this title");
+            return res.redirect('/dashboard');
+        }
 
-    return res.render('platform/searchresult.hbs', {
-        error: req.flash('error'),
-        success: req.flash('success'),
+        // Add API results to database
+        let con = mysql.createConnection(dbInfo);
+        // Check if movie already exists in database
+        con.query(`SELECT * FROM movies WHERE imdbID=${mysql.escape(imdbID)};`, (error, results, fields) => {
+            if (error) {
+                console.log(error.stack);
+                con.end();
+                return;
+            }
+
+            if (results.length === 0) {
+                // Make new movie
+                console.log('Movie does not already exist in database');
+                con.query(`INSERT INTO movies (imdbID, title, year, genre, director) VALUES (${mysql.escape(imdbID)}, ${mysql.escape(title)}, '${year}', ${mysql.escape(genre)}, ${mysql.escape(director)});`, (error, results, fields) => {
+
+                    //if (error) {
+                    //    console.log(error.stack);
+                    //    con.end();
+                    //    return;
+                    //}
+
+                    console.log(`${title} successfully added movie to database.`);
+                    con.end();
+                    req.flash('success', 'sucessfully added to database');
+                    return res.redirect('/searchresult');
+                });
+            }
+            else {
+                console.log('Movie already exists in database');
+                return res.redirect('/searchresult');
+            }
+        });
+
     });
 });
 
@@ -202,6 +238,42 @@ router.get('/register', AuthenticationFunctions.ensureNotAuthenticated,(req, res
   });
 });
 
+
+router.get('/sampleinput', AuthenticationFunctions.ensureAuthenticated,(req, res) => {
+  let con = mysql.createConnection(dbInfo);
+
+    con.query(`SELECT * FROM users WHERE id=${mysql.escape(req.user.identifier)};`, (error, user, fields) => {
+      if (error) {
+          console.log(error.stack);
+          con.end();
+          return res.send();
+      }
+      con.end();
+      return res.render('platform/sampleinput.hbs', {
+        testin: user[0].testInput,
+      });
+    });
+});
+
+router.post('/sampleinput', AuthenticationFunctions.ensureAuthenticated,(req, res) => {
+  let con = mysql.createConnection(dbInfo);
+
+  let t = req.body.testInput;
+  con.query(`UPDATE users SET testInput = ${mysql.escape(t)} WHERE users.id = ${mysql.escape(req.user.identifier)};`, (error, results, fields) => {
+  if (error) {
+      console.log(error.stack);
+      con.end();
+      return res.send();
+  }
+  con.end();
+  req.flash('success', 'test input successfully updated!!');
+  return res.redirect('/sampleinput');
+  });
+
+
+});
+
+
 router.get('/registeradmin', AuthenticationFunctions.ensureAuthenticated,(req, res) => {
     return res.render('platform/registeradmin.hbs', {
     error: req.flash('error'),
@@ -297,24 +369,18 @@ router.post('/registeradmin',AuthenticationFunctions.ensureAuthenticated,(req,re
   	  }
 
       let con = mysql.createConnection(dbInfo);
-      con.query(`SELECT * FROM user WHERE user=${mysql.escape(req.user.identifier)};`,(error,results,fields) =>{
+      con.query(`SELECT * FROM users WHERE id=${mysql.escape(req.user.identifier)};`,(error,results,fields) =>{
         if (error) {
           console.log(error.stack);
           con.end();
           return res.send();
         }
-        if(results.length ==0){
+   if(results[0].admin != '1'){
           con.end();
           req.flash('error', 'Only Admin Accounts can add Admin Accounts.');
           return res.redirect('/dashboard');
         }
-        if(results[0].admin != '1'){
-          con.end();
-          req.flash('error', 'Only Admin Accounts can add Admin Accounts.');
-          return res.redirect('/dashboard');
-        }
-      });
-
+    else{
       con.query(`SELECT * FROM users WHERE username=${mysql.escape(req.body.username)};`, (error, results, fields) => { //checks to see if username is already taken
           if (error) {
             console.log(error.stack);
@@ -354,6 +420,8 @@ router.post('/registeradmin',AuthenticationFunctions.ensureAuthenticated,(req,re
 
     }
     }); //initial query
+}
+        });
 });
 
 

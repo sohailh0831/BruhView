@@ -3,15 +3,15 @@
 <script>
     function search() {
         var name = {searchTitle};
-        alert("Name: ");
-        alert(name);
-        alert("Search");
+        //alert("Name: ");
+        //alert(name);
+        //alert("Search");
         // Search movie requested by user
         var start = "http://www.omdbapi.com/?t=";
         var searchTitle = document.getElementById("SearchBar").value;
         var key = "&apikey=f0e99e3";
         var apiSearchWithKey = start.concat(searchTitle, key);
-        alert(apiSearchWithKey);
+        //alert(apiSearchWithKey);
         var xmlHttp = new XMLHttpRequest();
         xmlHttp.open("GET", apiSearchWithKey, false);
         xmlHttp.send(null);
