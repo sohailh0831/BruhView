@@ -16,10 +16,23 @@ const mysql = require('mysql');
 const moment = require('moment');
 
 let dbInfo = {
+
   host: "localhost",
   user: "root",
   password: "cs252project!",
   database : 'BruhView'
+
+/*
+  connectionLimit: 100,
+   host:'134.209.4.10',
+   user:'root',
+   password:'cs252project!',
+   database:'BruhView',
+   port: 80,
+   debug: false,
+   multipleStatements: true
+
+   */
 };
 
 const LocalStrategy = require('passport-local').Strategy;
@@ -135,6 +148,14 @@ passport.use(new LocalStrategy({passReqToCallback: true,},
       });
 
 }));
+
+passport.serializeUser(function (uuid, done) {
+	done(null, uuid);
+});
+
+passport.deserializeUser(function (uuid, done) {
+  done(null, uuid);
+});
 
 
 
@@ -297,24 +318,10 @@ router.post('/registeradmin',AuthenticationFunctions.ensureAuthenticated,(req,re
 });
 
 
-
-
-
-
-
-
 router.get('/logout', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
   req.logout();
   req.session.destroy();
   return res.redirect('/login');
-});
-
-passport.serializeUser(function (uuid, done) {
-	done(null, uuid);
-});
-
-passport.deserializeUser(function (uuid, done) {
-  done(null, uuid);
 });
 
 
