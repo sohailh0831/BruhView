@@ -1,39 +1,5 @@
 {{> header}}
 <script src="../../../assets/demo/default/custom/crud/metronic-datatable/base/data-json-budgets.js" type="text/javascript"></script>
-<script>
-    function search() {
-        alert("Search");
-        // Search movie requested by user
-        var start = "http://www.omdbapi.com/?t=";
-        var searchTitle = document.getElementById("SearchBar").value;
-        var key = "&apikey=f0e99e3";
-        var apiSearchWithKey = start.concat(searchTitle, key);
-        alert(apiSearchWithKey);
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.open("GET", apiSearchWithKey, false);
-        xmlHttp.send(null);
-        var response = xmlHttp.responseText;
-
-        // Parse info
-        var obj = JSON.parse(response);
-        var title = obj.Title;
-        var year = obj.Year;
-        var genre = obj.Genre;
-        var director = obj.Director;
-
-        var titleSpan = document.getElementById('TitleValue');
-        titleSpan.textContent = title;
-
-        var yearSpan = document.getElementById('YearValue');
-        yearSpan.textContent = year;
-
-        var genreSpan = document.getElementById('GenreValue');
-        genreSpan.textContent = genre;
-
-        var directorSpan = document.getElementById('DirectorValue');
-        directorSpan.textContent = director;
-    }
-</script>
 
 <div class="m-grid__item m-grid__item--fluid m-wrapper">
     <div class="m-content">
@@ -66,7 +32,7 @@
                 </div>
               <div class="m-portlet__body">
                   <h1>
-                      <form class="m-form m-form--fit m-form--label-align-right">
+                      <form class="m-form m-form--fit m-form--label-align-right" method="post" action="/dashboard">
                           <div class="form-group m-form__group">
                               <label>Movie Name</label>
                               {{#if movie}}
@@ -77,7 +43,7 @@
                           </div>
                           <div class="m-portlet__foot m-portlet__foot--fit">
                               <div class="m-form__actions">
-                                  <button onclick="search()" class="btn btn-primary">Search</button>
+                                  <button class="btn btn-primary">Search</button>
                               </div>
                           </div>
                       </form>

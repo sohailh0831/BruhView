@@ -16,10 +16,20 @@ const mysql = require('mysql');
 const moment = require('moment');
 
 let dbInfo = {
+/*
   host: "localhost",
   user: "root",
   password: "cs252project!",
   database : 'BruhView'
+*/
+
+  connectionLimit: 100,
+   host:'134.209.4.10',
+   user:'root',
+   password:'cs252project!',
+   database:'BruhView',
+   port: 3306,
+   multipleStatements: true
 };
 
 const LocalStrategy = require('passport-local').Strategy;
@@ -34,11 +44,52 @@ router.get('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res)
 });
 */
 
-router.get('/dashboard',(req, res) => {
+router.get('/',AuthenticationFunctions.ensureAuthenticated,(req, res) => {
     return res.render('platform/dashboard.hbs', {
     error: req.flash('error'),
     success: req.flash('success'),
   });
+});
+
+router.get('/dashboard',AuthenticationFunctions.ensureAuthenticated,(req, res) => {
+    return res.render('platform/dashboard.hbs', {
+    error: req.flash('error'),
+    success: req.flash('success'),
+  });
+});
+
+
+router.post('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
+    let searchTitle = req.body.memoInput;
+    console.log("Search title is next line");
+    console.log(searchTitle);
+
+    // Search movie requested by user
+    var start = "http://www.omdbapi.com/?t=";
+    var key = "&apikey=f0e99e3";
+    var apiSearchWithKey = start.concat(searchTitle, key);
+    console.log(apiSearchWithKey);
+
+    const request = require('request');
+
+    request(apiSearchWithKey, function(error, response, body) {
+        // Parse info
+        var obj = JSON.parse(body);
+        var title = obj.Title;
+        var year = obj.Year;
+        var genre = obj.Genre;
+        var director = obj.Director;
+
+        console.log(title);
+        console.log(year);
+        console.log(genre);
+        console.log(director);
+    });
+
+    return res.render('platform/searchresult.hbs', {
+        error: req.flash('error'),
+        success: req.flash('success'),
+    });
 });
 
 
@@ -47,6 +98,23 @@ router.get('/login',AuthenticationFunctions.ensureNotAuthenticated, (req, res) =
     error: req.flash('error'),
     success: req.flash('success'),
   });
+});
+
+router.get('/searchresult', (req, res) => {
+
+    return res.render('platform/searchresult.hbs', {
+        error: req.flash('error'),
+        success: req.flash('success'),
+    });
+});
+
+router.post('/searchresult', (req, res) => {
+    let memoinput = req.body.memoInput;
+
+    return res.render('platform/searchresult.hbs', {
+        error: req.flash('error'),
+        success: req.flash('success'),
+    });
 });
 
 router.post('/login', AuthenticationFunctions.ensureNotAuthenticated, passport.authenticate('local', { successRedirect: '/dashboard', failureRedirect: '/login', failureFlash: true }), (req, res) => {
@@ -84,6 +152,14 @@ passport.use(new LocalStrategy({passReqToCallback: true,},
       });
 
 }));
+
+passport.serializeUser(function (uuid, done) {
+	done(null, uuid);
+});
+
+passport.deserializeUser(function (uuid, done) {
+  done(null, uuid);
+});
 
 
 
@@ -246,24 +322,10 @@ router.post('/registeradmin',AuthenticationFunctions.ensureAuthenticated,(req,re
 });
 
 
-
-
-
-
-
-
 router.get('/logout', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
   req.logout();
   req.session.destroy();
   return res.redirect('/login');
-});
-
-passport.serializeUser(function (uuid, done) {
-	done(null, uuid);
-});
-
-passport.deserializeUser(function (uuid, done) {
-  done(null, uuid);
 });
 
 

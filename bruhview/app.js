@@ -25,15 +25,16 @@ app.engine('.hbs', exphbs({
 app.set('view engine', '.hbs');
 app.set('views', path.join(__dirname, 'views'));
 
+// Load routes
 const userend = require('./routes/userend');
 
-
+// Static folder
 app.use(express.static(path.join(__dirname, '/public')));
 app.use(cookieParser());
 // Body parser middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-
+// Express Session
 app.use(session({
     secret: 'q3lk4gnk3ngkl3kgnq3klgn',
     saveUninitialized: false,
@@ -45,8 +46,8 @@ app.use(expressValidator());
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Use routes
 app.use('/', userend);
-//app.use('/', tempEmailChange);
 
 // Static folder
 app.use(express.static(path.join(__dirname, '/public')));
