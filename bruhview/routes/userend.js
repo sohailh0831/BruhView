@@ -16,23 +16,20 @@ const mysql = require('mysql');
 const moment = require('moment');
 
 let dbInfo = {
-
+/*
   host: "localhost",
   user: "root",
   password: "cs252project!",
   database : 'BruhView'
+*/
 
-/*
   connectionLimit: 100,
    host:'134.209.4.10',
    user:'root',
    password:'cs252project!',
    database:'BruhView',
-   port: 80,
-   debug: false,
+   port: 3306,
    multipleStatements: true
-
-   */
 };
 
 const LocalStrategy = require('passport-local').Strategy;
