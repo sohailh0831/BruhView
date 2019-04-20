@@ -17,9 +17,7 @@ const moment = require('moment');
 
 let dbInfo = {
 
-  connectionLimit : 100,
-  host: "134.209.4.10",
-  port: "80",
+  host: "localhost",
   user: "root",
   password: "cs252project!",
   database : 'BruhView'
