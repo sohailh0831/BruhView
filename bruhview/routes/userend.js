@@ -173,7 +173,27 @@ passport.deserializeUser(function (uuid, done) {
   done(null, uuid);
 });
 
-
+router.post('/info',AuthenticationFunctions.ensureAuthenticated,(req,res)=>{
+  let con = mysql.createConnection(dbInfo);
+      con.query(`SELECT * FROM users WHERE username==${mysql.escape(req.user.identifier)};`,(error,results,fields) =>{
+        if (error) {
+          console.log(error.stack);
+          con.end();
+          return res.send();
+        }
+        if (results) {
+          let user = {
+            identifier: results[0].id,
+            username: results[0].username,
+            firstName: results[0].firstname,
+            lastName: results[0].lastname,
+        };
+          con.end();
+          req.flash('bruh moment');
+          return res.redirect('/settings');
+        }
+      });
+});
 
 router.get('/register', AuthenticationFunctions.ensureNotAuthenticated,(req, res) => {
     return res.render('platform/register.hbs', {
@@ -253,6 +273,9 @@ router.post('/register',AuthenticationFunctions.ensureNotAuthenticated,(req,res)
 
 
 });
+
+
+
 
 router.post('/registeradmin',AuthenticationFunctions.ensureAuthenticated,(req,res)=>{
   let firstname = req.body.firstname;

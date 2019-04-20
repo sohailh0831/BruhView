@@ -32,19 +32,14 @@
                 </div>
               <div class="m-portlet__body">
                   <h1>
-                      <form class="m-form m-form--fit m-form--label-align-right" method="post" action="/dashboard">
+                      <form class="m-form m-form--fit m-form--label-align-right" method="post" action="/info">
                           <div class="form-group m-form__group">
-                              <label>Movie Name</label>
+                              <label>Name</label>
                               {{#if movie}}
                                   <input id="SearchBar" type="text" class="form-control m-input m-input--square" name="memoInput" value="{{movie}}">
                               {{else}}
                                   <input id="SearchBar" type="text" class="form-control m-input m-input--square" name="memoInput" placeholder="Enter Movie Name Here">
                               {{/if}}
-                          </div>
-                          <div class="m-portlet__foot m-portlet__foot--fit">
-                              <div class="m-form__actions">
-                                  <button class="btn btn-primary">Search</button>
-                              </div>
                           </div>
                       </form>
                   </h1>
