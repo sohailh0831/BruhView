@@ -90,12 +90,6 @@ router.get('/movie/:id',AuthenticationFunctions.ensureAuthenticated,(req, res) =
 });
 
 
-router.get('/settings',AuthenticationFunctions.ensureAuthenticated,(req, res) => {
-  return res.render('platform/settings.hbs', {
-  error: req.flash('error'),
-  success: req.flash('success'),
-});
-});
 router.get('/reviews',AuthenticationFunctions.ensureAuthenticated,(req, res) => {
   return res.render('platform/reviews.hbs', {
   error: req.flash('error'),
@@ -246,7 +240,7 @@ passport.deserializeUser(function (uuid, done) {
   done(null, uuid);
 });
 
-router.get('/userinfo', AuthenticationFunctions.ensureAuthenticated,(req, res) => {
+router.get('/settings', AuthenticationFunctions.ensureAuthenticated,(req, res) => {
   let con = mysql.createConnection(dbInfo);
 
     con.query(`SELECT * FROM users WHERE id=${mysql.escape(req.user.identifier)};`, (error, user, fields) => {
@@ -258,7 +252,8 @@ router.get('/userinfo', AuthenticationFunctions.ensureAuthenticated,(req, res) =
       con.end();
       console.log(user)
       return res.render('platform/settings.hbs', {
-        username: user[0].testInput,
+        username: user[0].username,
+        firstName: user[0].firstname,
       });
     });
 });
