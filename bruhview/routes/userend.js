@@ -209,26 +209,21 @@ passport.deserializeUser(function (uuid, done) {
   done(null, uuid);
 });
 
-router.post('/info',AuthenticationFunctions.ensureAuthenticated,(req,res)=>{
+router.get('/userinfo', AuthenticationFunctions.ensureAuthenticated,(req, res) => {
   let con = mysql.createConnection(dbInfo);
-      con.query(`SELECT * FROM users WHERE username==${mysql.escape(req.user.identifier)};`,(error,results,fields) =>{
-        if (error) {
+
+    con.query(`SELECT * FROM users WHERE id=${mysql.escape(req.user.identifier)};`, (error, user, fields) => {
+      if (error) {
           console.log(error.stack);
           con.end();
           return res.send();
-        }
-        if (results) {
-          let user = {
-            identifier: results[0].id,
-            username: results[0].username,
-            firstName: results[0].firstname,
-            lastName: results[0].lastname,
-        };
-          con.end();
-          req.flash('bruh moment');
-          return res.redirect('/settings');
-        }
+      }
+      con.end();
+      console.log(user)
+      return res.render('platform/settings.hbs', {
+        username: user[0].testInput,
       });
+    });
 });
 
 router.get('/register', AuthenticationFunctions.ensureNotAuthenticated,(req, res) => {

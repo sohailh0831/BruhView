@@ -25,24 +25,26 @@
                     <div class="m-portlet__head-caption">
                         <div class="m-portlet__head-title">
                             <h3 class="m-portlet__head-text">
-                                
+                                Settings
                             </h3>
                         </div>
                     </div>
                 </div>
               <div class="m-portlet__body">
                   <h1>
-                      <form class="m-form m-form--fit m-form--label-align-right" method="post" action="/info">
-                          <div class="form-group m-form__group">
-                              <label>Name</label>
-                              {{#if movie}}
-                                  <input id="SearchBar" type="text" class="form-control m-input m-input--square" name="memoInput" value="{{movie}}">
-                              {{else}}
-                                  <input id="SearchBar" type="text" class="form-control m-input m-input--square" name="memoInput" placeholder="Enter Movie Name Here">
-                              {{/if}}
-                          </div>
-                      </form>
+                        <form class="m-form m-form--fit m-form--label-align-right" action="/userinfo" method="post">
+                            <div class="form-group m-form__group">
+                                
+                                <label>Test</label>
+                                {{#if username}}
+                                    <div>Test2</div>
+                                {{/if}}
+                            </div>
+                            <div class="m-portlet__foot m-portlet__foot--fit">
+                            </div>
+                        </form>
                   </h1>
+                  
               </div>
               </div>
             </div>
