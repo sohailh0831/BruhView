@@ -292,6 +292,7 @@ router.get('/settings', AuthenticationFunctions.ensureAuthenticated,(req, res) =
       return res.render('platform/settings.hbs', {
         username: user[0].username,
         firstName: user[0].firstname,
+        lastName : user[0].lastname,
       });
     });
 });
