@@ -70,7 +70,7 @@ router.get('/movie/:id',AuthenticationFunctions.ensureAuthenticated,(req, res) =
       }
 
       if (results.length === 0) {
-        req.flash('errir', 'Movie ID has not been added to database yet');
+        req.flash('error', 'Movie ID has not been added to database yet');
         return res.redirect(`/dashboard`);
       }
 
@@ -79,6 +79,7 @@ router.get('/movie/:id',AuthenticationFunctions.ensureAuthenticated,(req, res) =
       genre:results[0].genre,
       year:results[0].year,
       director:results[0].director,
+      picture: results[0].pic,
       error: req.flash('error'),
       success: req.flash('success'),
     });
@@ -121,6 +122,7 @@ router.post('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res
     var genre;
     var director;
     var imdbID;
+    var pic = "none";
 
     request(apiSearchWithKey, function (error, response, body) {
         // Parse info
@@ -130,9 +132,11 @@ router.post('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res
         genre = obj.Genre;
         director = obj.Director;
         imdbID = obj.imdbID;
+        pic = obj.Poster;
 
         if(typeof imdbID == "undefined") {
             console.log("IMDB API failed to find a movie with this title");
+            req.flash('error', 'IMDB API failed to find a movie with this title"');
             return res.redirect('/dashboard');
         }
 
@@ -149,20 +153,19 @@ router.post('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res
             if (results.length === 0) {
                 // Make new movie
                 console.log('Movie does not already exist in database');
-                con.query(`INSERT INTO movies (imdbID, title, year, genre, director) VALUES (${mysql.escape(imdbID)}, ${mysql.escape(title)}, '${year}', ${mysql.escape(genre)}, ${mysql.escape(director)});`, (error, results, fields) => {
+                console.log(`${pic}`);
+                con.query(`INSERT INTO movies (imdbID, title, year, genre, director,pic) VALUES (${mysql.escape(imdbID)}, ${mysql.escape(title)}, '${year}', ${mysql.escape(genre)}, ${mysql.escape(director)},${mysql.escape(pic)});`, (error, results, fields) => {
 
-                    //if (error) {
-                    //    console.log(error.stack);
-                    //    con.end();
-                    //    return;
-                    //}
+                    if (error) {
+                        console.log(error.stack);
+                        con.end();
+                        return;
+                    }
 
                     console.log(`${title} successfully added movie to database.`);
                     con.end();
-                    req.flash('success', 'sucessfully added to database');
-
-
                     return res.redirect(`/movie/${imdbID}`);
+                    req.flash('success', 'sucessfully added to database');
                     //return res.redirect('/searchresult');
                 });
             }
