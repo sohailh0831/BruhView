@@ -1,86 +1,38 @@
 {{> header}}
-<div class="m-grid__item m-grid__item--fluid m-wrapper">
+<div>
+    <div class="m-grid__item m-grid__item--fluid m-wrapper" >
 
-<div class="row">
+        <h1 class="m-portlet__head-text">
+            {{title}} ({{year}})
+        </h1>
+        <div class="media">
+            <img class="mr-3" src="{{picture}}" alt="Unable to load poster picture">
+            <div class="media-body">
+                <h4 class="m-portlet__head-text">
+                    {{genre}}
+                </h4>
+                <h4 class="m-portlet__head-text">
+                    Directed by {{director}}
+                </h4>
+            </div>
+        </div>
 
-    <div class="col-lg-3">
-        <div class="m-portlet m-portlet--mobile">
-            <div class="m-portlet__head">
-                <div class="m-portlet__head-caption">
-                    <div class="m-portlet__head-title">
-                        <h3 class="m-portlet__head-text">
-                            Title: {{title}}
-                        </h3>
+        <div class="row">
+            <div class="col-lg-9">
+                <div class="m-portlet m-portlet--mobile">
+                    <div class="m-portlet__head">
+                        <div class="m-portlet__head-caption">
+                            <div class="m-portlet__head-title">
+                                <h3 class="m-portlet__head-text">
+                                    Reviews (Live Chat):
+                                </h3>
+                            </div>
+                        </div>
                     </div>
+                    sampleUser: some review
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-lg-3">
-        <div class="m-portlet m-portlet--mobile">
-            <div class="m-portlet__head">
-                <div class="m-portlet__head-caption">
-                    <div class="m-portlet__head-title">
-                        <h3 class="m-portlet__head-text">
-                            Year: {{year}}
-                        </h3>
-                    </div>
-                </div>
-            </div>
-         </div>
-    </div>
-    <div class="col-lg-3">
-        <div class="m-portlet m-portlet--mobile">
-            <div class="m-portlet__head">
-                <div class="m-portlet__head-caption">
-                    <div class="m-portlet__head-title">
-                        <h3 class="m-portlet__head-text">
-                            Genre: {{genre}}
-                        </h3>
-                    </div>
-                </div>
-            </div>
-         </div>
-    </div>
-    <div class="col-lg-3">
-        <div class="m-portlet m-portlet--mobile">
-            <div class="m-portlet__head">
-                <div class="m-portlet__head-caption">
-                    <div class="m-portlet__head-title">
-                        <h3 class="m-portlet__head-text">
-                            Director: {{director}}
-                        </h3>
-                    </div>
-                </div>
-            </div>
-         </div>
-    </div>
-</div>
-
-
-<div class="row">
-<div class="col-lg-3">
-  <img src="{{picture}}" alt="Unable to load poster picture">
-</div>
-  <div class="col-lg-9">
-    <div class="m-portlet m-portlet--mobile">
-        <div class="m-portlet__head">
-            <div class="m-portlet__head-caption">
-                <div class="m-portlet__head-title">
-                    <h3 class="m-portlet__head-text">
-                        Reviews (Live Chat):
-                    </h3>
-                </div>
-            </div>
-        </div>
-        sampleUser: some review
-     </div>
-  </div>
-
-</div>
-
-
-
-
 </div>
 {{> footer}}
