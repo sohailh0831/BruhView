@@ -57,6 +57,38 @@ router.get('/dashboard',AuthenticationFunctions.ensureAuthenticated,(req, res) =
     success: req.flash('success'),
   });
 });
+
+router.get('/movie/:id',AuthenticationFunctions.ensureAuthenticated,(req, res) => {
+    console.log(`${req.params.id}`);
+
+    let con = mysql.createConnection(dbInfo);
+    con.query(`SELECT * FROM movies WHERE imdbID=${mysql.escape(req.params.id)};`, (error, results, fields) => {
+      if (error) {
+          console.log(error.stack);
+          con.end();
+          return;
+      }
+
+      if (results.length === 0) {
+        req.flash('errir', 'Movie ID has not been added to database yet');
+        return res.redirect(`/dashboard`);
+      }
+
+      return res.render('platform/movie.hbs', {
+      title: results[0].title,
+      genre:results[0].genre,
+      year:results[0].year,
+      director:results[0].director,
+      error: req.flash('error'),
+      success: req.flash('success'),
+    });
+
+
+
+    });
+});
+
+
 router.get('/settings',AuthenticationFunctions.ensureAuthenticated,(req, res) => {
   return res.render('platform/settings.hbs', {
   error: req.flash('error'),
@@ -128,12 +160,14 @@ router.post('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res
                     console.log(`${title} successfully added movie to database.`);
                     con.end();
                     req.flash('success', 'sucessfully added to database');
-                    return res.redirect('/searchresult');
+
+
+                    return res.redirect(`/movie/${imdbID}`);
+                    //return res.redirect('/searchresult');
                 });
             }
             else {
-                console.log('Movie already exists in database');
-                return res.redirect('/searchresult');
+                return res.redirect(`/movie/${imdbID}`);
             }
         });
 
