@@ -1,93 +1,88 @@
 {{> header}}
 
 <script src="../../../assets/demo/default/custom/crud/metronic-datatable/base/data-json-reviews.js" type="text/javascript"></script>
-				<div class="m-grid__item m-grid__item--fluid m-wrapper">
+<div class="m-grid__item m-grid__item--fluid m-wrapper">
 
-					<div class="m-content">
-						{{#if error}}
-						<div class="alert alert-danger alert-dismissible fade show" role="alert">
-							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-							</button>
-							<strong>Oh snap!</strong> {{error}}
-						</div>
-						{{/if}}
-            {{#if success}}
-						<div class="alert alert-success alert-dismissible fade show" role="alert">
-							<button type="button" class="close" data-dismiss="alert" aria-label="Close">
-							</button>
-							<strong>Success!</strong> {{success}}
-						</div>
-						{{/if}}
-
-
-
-
-              <div class="m-portlet m-portlet--mobile">
-							<div class="m-portlet__head">
-								<div class="m-portlet__head-caption">
-									<div class="m-portlet__head-title">
-										<h3 class="m-portlet__head-text">
-                      <font size="4"> <strong>  {{title}} </strong></font>
-
-										</h3>
-									</div>
-								</div>
-							</div>
-							<div class="m-portlet__body">
-                <div class="row">
-                  <div class="col-lg-4">
-                <img src="{{picture}}"style="width: 70%; height: 90%" alt="Poster">
-							</div>
-              <div class="col-lg-8">
-                <br>
-                <font size="4"> <strong>  Year: </strong>{{year}}</font>
-                <br><br>
-                <font size="4"><strong>  Genre: </strong>{{genre}}</font>
-                <br><br>
-                <font size="4"><strong>  Director: </strong>{{director}}</font>
-                <br><br>
-                <font size="4"><strong>  Plot: </strong>{{plot}}</font>
-                <br><br>
-                <font size="4"><strong>  BruhView Score: </strong>{{score}}</font>
-              </div>
+    <div class="m-content">
+        {{#if error}}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                </button>
+                <strong>Oh snap!</strong> {{error}}
             </div>
+        {{/if}}
+        {{#if success}}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                </button>
+                <strong>Success!</strong> {{success}}
             </div>
-						</div>
+        {{/if}}
 
-            <div class="m-portlet m-portlet--mobile">
+
+        <div class="m-portlet m-portlet--mobile">
             <div class="m-portlet__head">
-              <div class="m-portlet__head-caption">
-                <div class="m-portlet__head-title">
-                  <h3 class="m-portlet__head-text">
-                    <font size="4"> <strong>  Reviews (Live Chat) </strong></font>
-
-                  </h3>
+                <div class="m-portlet__head-caption">
+                    <div class="m-portlet__head-title">
+                        <h3 class="m-portlet__head-text">
+                            <font size="4"> <strong>  {{title}} ({{year}})</strong></font>
+                        </h3>
+                    </div>
                 </div>
-              </div>
+            </div>
+            <div class="m-portlet__body">
+                <div class="row">
+                    <div class="col-lg-4">
+                        <img src="{{picture}}"style="width: 70%; height: 90%" alt="Poster">
+                    </div>
+                    <div class="col-lg-8">
+                        <br>
+                        <font size="4"><strong>  Genre: </strong>{{genre}}</font>
+                        <br><br>
+                        <font size="4"><strong>  Director: </strong>{{director}}</font>
+                        <br><br>
+                        <font size="4"><strong>  Plot: </strong>{{plot}}</font>
+                        <br><br>
+                        <font size="4"><strong>  BruhView Score: </strong>{{score}}</font>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="m-portlet m-portlet--mobile">
+            <div class="m-portlet__head">
+                <div class="m-portlet__head-caption">
+                    <div class="m-portlet__head-title">
+                        <h3 class="m-portlet__head-text">
+                            <font size="4"> <strong>  Reviews (Live Chat) </strong></font>
+
+                        </h3>
+                    </div>
+                </div>
             </div>
             <div class="m-portlet__body">
 
-  								<!--begin: Datatable -->
-                  <a onClick="location.href=location.href" class="btn btn-info"> Refresh</a>
-  								<div class="m_datatable" id="json_data"></div>
-  								<!--end: Datatable -->
-                  <label><strong>Add Review</strong></label>
-                  <form  method="post" action="/add-review/{{movieid}}">
-                  <input id="SearchBar" type="text" class="form-control m-input m-input--square" name="review" placeholder="Enter Review Here">
-                  <div class="m-portlet__foot m-portlet__foot--fit">
-                      <div class="m-form__actions">
-                          <button class="btn btn-primary">Send</button>
-                      </div>
-                  </div>
-                  </form>
-          </div>
-          </div>
+                <!--begin: Datatable -->
+                <a onClick="location.href=location.href" class="btn btn-info"> Refresh</a>
+                <div class="m_datatable" id="json_data"></div>
+                <!--end: Datatable -->
+                <label><strong>Add Review</strong></label>
+                <form  method="post" action="/add-review/{{movieid}}">
+                    <input id="SearchBar" type="text" class="form-control m-input m-input--square" name="review" placeholder="Enter Review Here">
+                    <div class="m-portlet__foot m-portlet__foot--fit">
+                        <div class="m-form__actions">
+                            <button class="btn btn-primary">Send</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
 
 
 
-            <!--end::Portlet-->
+        <!--end::Portlet-->
 
-						<!--End::Main Portlet-->
-					</div>
-				</div>
-			{{> footer}}
+        <!--End::Main Portlet-->
+    </div>
+</div>
+{{> footer}}
