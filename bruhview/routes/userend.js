@@ -75,11 +75,13 @@ router.get('/movie/:id',AuthenticationFunctions.ensureAuthenticated,(req, res) =
       }
 
       return res.render('platform/movie.hbs', {
+      movieid: results[0].imdbID,
       title: results[0].title,
       genre:results[0].genre,
       year:results[0].year,
       director:results[0].director,
       picture: results[0].pic,
+      plot : results[0].plot,
       error: req.flash('error'),
       success: req.flash('success'),
     });
@@ -88,6 +90,28 @@ router.get('/movie/:id',AuthenticationFunctions.ensureAuthenticated,(req, res) =
 
     });
 });
+
+router.post('/add-review/:id', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
+    var user = req.user.username;
+    var rev = req.body.review;
+    var mov = req.params.id;
+
+    let con = mysql.createConnection(dbInfo);
+    con.query(`INSERT INTO reviews (movieid, review, username) VALUES (${mysql.escape(mov)}, ${mysql.escape(rev)}, ${mysql.escape(user)});`, (error, results, fields) => {
+
+                          if (error) {
+                              console.log(error.stack);
+                              con.end();
+                              return;
+                          }
+                          con.end();
+                          return res.redirect(`/movie/${mov}`);
+                          req.flash('success', 'Review Added');
+                          //return res.redirect('/searchresult');
+                      });
+
+});
+
 
 
 router.get('/reviews',AuthenticationFunctions.ensureAuthenticated,(req, res) => {
@@ -127,6 +151,7 @@ router.post('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res
         director = obj.Director;
         imdbID = obj.imdbID;
         pic = obj.Poster;
+        plot = obj.Plot;
 
         if(typeof imdbID == "undefined") {
             console.log("IMDB API failed to find a movie with this title");
@@ -148,7 +173,7 @@ router.post('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res
                 // Make new movie
                 console.log('Movie does not already exist in database');
                 console.log(`${pic}`);
-                con.query(`INSERT INTO movies (imdbID, title, year, genre, director,pic) VALUES (${mysql.escape(imdbID)}, ${mysql.escape(title)}, '${year}', ${mysql.escape(genre)}, ${mysql.escape(director)},${mysql.escape(pic)});`, (error, results, fields) => {
+                con.query(`INSERT INTO movies (imdbID, title, year, genre, director,pic,plot) VALUES (${mysql.escape(imdbID)}, ${mysql.escape(title)}, '${year}', ${mysql.escape(genre)}, ${mysql.escape(director)},${mysql.escape(pic)},${mysql.escape(plot)});`, (error, results, fields) => {
 
                     if (error) {
                         console.log(error.stack);
@@ -169,6 +194,19 @@ router.post('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res
         });
 
     });
+});
+
+router.post('/categories/get-user-reviews/:id', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
+  let con = mysql.createConnection(dbInfo);
+  con.query(`SELECT * FROM reviews WHERE movieid=${mysql.escape(req.params.id)};`, (error, results, fields) => {
+    if (error) {
+        console.log(error.stack);
+        con.end();
+        return res.send();
+    }
+    con.end();
+    res.send(results);
+  });
 });
 
 
@@ -254,7 +292,7 @@ router.get('/settings', AuthenticationFunctions.ensureAuthenticated,(req, res) =
       return res.render('platform/settings.hbs', {
         username: user[0].username,
         firstName: user[0].firstname,
-        lastName: user[0].lastname
+        lastName : user[0].lastname,
       });
     });
 });

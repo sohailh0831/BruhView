@@ -1,13 +1,18 @@
 var DatatableJsonRemoteDemo = {
+
     init: function() {
         var t, e;
-      
+
+        var fullurl = window.location.pathname;
+        var spliturl = fullurl.split("/");
+        var part = spliturl[2];
+
         t = $(".m_datatable").mDatatable({
             data: {
                 type: "remote",
                 source: {
                   read: {
-                    url: '/categories/get-user-categories',
+                    url: `/categories/get-user-reviews/${part}`,
                     method: 'POST'
                   },
                 },
@@ -24,19 +29,13 @@ var DatatableJsonRemoteDemo = {
                 input: $("#generalSearch")
             },
             columns: [{
-                field: "name",
-                title: "Name",
-                width: 400,
+                field: "username",
+                title: "Username",
+                width: 100,
             }, {
-                field: "expenses",
-                title: "Expenses",
-                width: 400,
-            }, {
-                field: "id",
-                title: "Analysis",
-                template: function(t) {
-                  return `<a href="/category/${t.id}" class="btn btn-primary m-btn m-btn--pill m-btn--air">View</a>`;
-                }
+                field: "review",
+                title: "Review",
+                width: 800,
             }]
         })
     }
