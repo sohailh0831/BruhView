@@ -96,7 +96,7 @@ router.post('/add-review/:id', AuthenticationFunctions.ensureAuthenticated, (req
     var rev = req.body.review;
     var mov = req.params.id;
     var oldRate;
-    var newRate = req.params.rate;
+    var newRate = parseInt(req.body.score);
     var count;
 
     let con = mysql.createConnection(dbInfo);
@@ -113,16 +113,42 @@ router.post('/add-review/:id', AuthenticationFunctions.ensureAuthenticated, (req
     });*/
     con.query(`INSERT INTO reviews (movieid, review, username) VALUES (${mysql.escape(mov)}, ${mysql.escape(rev)}, ${mysql.escape(user)});`, (error, results, fields) => {
 
-                          if (error) {
-                              console.log(error.stack);
-                              con.end();
-                              return;
-                          }
-                          con.end();
-                          return res.redirect(`/movie/${mov}`);
-                          req.flash('success', 'Review Added');
-                          //return res.redirect('/searchresult');
-                      });
+      if (error) {
+          console.log(error.stack);
+          con.end();
+          return;
+      }
+      
+      con.query(`SELECT * FROM movies WHERE imdbID=${mysql.escape(mov)};`, (error, results, fields) => {
+        if (error) {
+            console.log(error.stack);
+            con.end();
+            return;
+        }
+        oldRate = parseInt(results[0].totalScore);
+        count = parseInt(results[0].numRate);
+      });
+      
+      if(newRate > 10){
+        newRate = 10;
+      }else if(newRate < 1){
+        newRate = 1;
+      }
+      oldRate = oldRate + newRate;
+      count++;
+      
+      con.query(`UPDATE movies SET totalScore = ${mysql.escape(oldRate)} WHERE movies.imdbID = ${mysql.escape(mov)};`, (error, results, fields) => {
+        if (error) {
+          console.log(error.stack);
+          con.end();
+          return;
+        }
+      });
+      con.end();
+      return res.redirect(`/movie/${mov}`);
+      req.flash('success', 'Review Added');
+      //return res.redirect('/searchresult');
+  });
 
 });
 
