@@ -95,8 +95,21 @@ router.post('/add-review/:id', AuthenticationFunctions.ensureAuthenticated, (req
     var user = req.user.username;
     var rev = req.body.review;
     var mov = req.params.id;
+    var oldRate;
+    var newRate = req.params.rate;
+    var count;
 
     let con = mysql.createConnection(dbInfo);
+    con.query(`SELECT * FROM movies WHERE imdbID=${mysql.escape(mov)};`, (error, results, fields) => {
+      if (error) {
+          console.log(error.stack);
+          con.end();
+          return;
+      }
+      oldRate = response[0].totalScore;
+      count = response[0].numRate;
+
+    });
     con.query(`INSERT INTO reviews (movieid, review, username) VALUES (${mysql.escape(mov)}, ${mysql.escape(rev)}, ${mysql.escape(user)});`, (error, results, fields) => {
 
                           if (error) {
