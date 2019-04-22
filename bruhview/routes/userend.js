@@ -52,10 +52,47 @@ router.get('/',AuthenticationFunctions.ensureAuthenticated,(req, res) => {
 });
 
 router.get('/dashboard',AuthenticationFunctions.ensureAuthenticated,(req, res) => {
-    return res.render('platform/dashboard.hbs', {
-    error: req.flash('error'),
-    success: req.flash('success'),
-  });
+    let con = mysql.createConnection(dbInfo);
+    con.query(`SELECT * FROM movies;`, (error, results, fields) => {
+      if (error) {
+          console.log(error.stack);
+          con.end();
+          return;
+      }
+
+      var len = results.length;
+      mov1 = Math.floor((Math.random() * len));
+      mov2 = Math.floor((Math.random() * len));
+      mov3 = Math.floor((Math.random() * len));
+      mov4 = Math.floor((Math.random() * len));
+
+      return res.render('platform/dashboard.hbs', {
+
+      title1: results[mov1].title,
+      title2: results[mov2].title,
+      title3: results[mov3].title,
+      title4: results[mov4].title,
+
+      pic1: results[mov1].pic,
+      pic2: results[mov2].pic,
+      pic3: results[mov3].pic,
+      pic4: results[mov4].pic,
+
+
+      id1: results[mov1].imdbID,
+      id2: results[mov2].imdbID,
+      id3: results[mov3].imdbID,
+      id4: results[mov4].imdbID,
+
+
+      error: req.flash('error'),
+      success: req.flash('success'),
+    });
+
+
+
+
+    });
 });
 
 router.get('/movie/:id',AuthenticationFunctions.ensureAuthenticated,(req, res) => {
@@ -119,8 +156,8 @@ router.post('/add-review/:id', AuthenticationFunctions.ensureAuthenticated, (req
                               return;
                           }
                           con.end();
-                          return res.redirect(`/movie/${mov}`);
                           req.flash('success', 'Review Added');
+                          return res.redirect(`/movie/${mov}`);
                           //return res.redirect('/searchresult');
                       });
 
