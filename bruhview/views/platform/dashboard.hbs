@@ -21,38 +21,81 @@
 
         <div class="row">
             <div class="col-lg-12">
-              <div class="m-portlet m-portlet--mobile">
-                <div class="m-portlet__head">
-                    <div class="m-portlet__head-caption">
-                        <div class="m-portlet__head-title">
-                            <h3 class="m-portlet__head-text">
-                                Search For Movies
-                            </h3>
+                <div class="m-portlet m-portlet--mobile">
+                    <div class="m-portlet__head">
+                        <div class="m-portlet__head-caption">
+                            <div class="m-portlet__head-title">
+                                <h3 class="m-portlet__head-text">
+                                    Search For Movies
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="m-portlet__body">
+                        <h1>
+                            <form class="m-form m-form--fit m-form--label-align-right" method="post" action="/dashboard">
+                                <div class="form-group m-form__group">
+                                    <label>Movie Name</label>
+                                    {{#if movie}}
+                                        <input id="SearchBar" type="text" class="form-control m-input m-input--square" name="searchTitle" value="{{movie}}">
+                                    {{else}}
+                                        <input id="SearchBar" type="text" class="form-control m-input m-input--square" name="searchTitle" placeholder="Enter Movie Name Here">
+                                    {{/if}}
+                                </div>
+                                <div class="m-portlet__foot m-portlet__foot--fit">
+                                    <div class="m-form__actions">
+                                        <button class="btn btn-primary">Search</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="m-portlet m-portlet--mobile">
+                    <div class="m-portlet__head">
+                        <div class="m-portlet__head-caption">
+                            <div class="m-portlet__head-title">
+                                <h3 class="m-portlet__head-text">
+                                    Jump to random movie
+                                </h3>
+                            </div>
                         </div>
                     </div>
                 </div>
-              <div class="m-portlet__body">
-                  <h1>
-                      <form class="m-form m-form--fit m-form--label-align-right" method="post" action="/dashboard">
-                          <div class="form-group m-form__group">
-                              <label>Movie Name</label>
-                              {{#if movie}}
-                                  <input id="SearchBar" type="text" class="form-control m-input m-input--square" name="searchTitle" value="{{movie}}">
-                              {{else}}
-                                  <input id="SearchBar" type="text" class="form-control m-input m-input--square" name="searchTitle" placeholder="Enter Movie Name Here">
-                              {{/if}}
-                          </div>
-                          <div class="m-portlet__foot m-portlet__foot--fit">
-                              <div class="m-form__actions">
-                                  <button class="btn btn-primary">Search</button>
-                              </div>
-                          </div>
-                      </form>
-                  </h1>
-              </div>
-              </div>
             </div>
+        </div>
+
+        <div class="card" style="width: 18rem;">
+            <img class="card-img-top" src="https://m.media-amazon.com/images/M/MV5BNWMxYTYzYWQtNGZmNy00MTg5LTk1N2MtNzQ5NjQxYjQ5NTJhXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_UX182_CR0,0,182,268_AL_.jpg" alt="Card image cap">
+            <div class="card-body">
+                <h5 class="card-title">Card title</h5>
+                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                <a href="#" class="btn btn-primary">Go somewhere</a>
             </div>
+        </div>
+
+        <div class="card" style="width: 18rem;">
+            <img class="card-img-top" src="https://m.media-amazon.com/images/M/MV5BNWMxYTYzYWQtNGZmNy00MTg5LTk1N2MtNzQ5NjQxYjQ5NTJhXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_UX182_CR0,0,182,268_AL_.jpg" alt="Card image cap">
+            <div class="card-body">
+                <h5 class="card-title">Card title</h5>
+                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                <a href="#" class="btn btn-primary">Go somewhere</a>
+            </div>
+        </div>
+
+        <div class="card" style="width: 18rem;">
+            <img class="card-img-top" src="https://m.media-amazon.com/images/M/MV5BNWMxYTYzYWQtNGZmNy00MTg5LTk1N2MtNzQ5NjQxYjQ5NTJhXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_UX182_CR0,0,182,268_AL_.jpg" alt="Card image cap">
+            <div class="card-body">
+                <h5 class="card-title">Card title</h5>
+                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                <a href="#" class="btn btn-primary">Go somewhere</a>
+            </div>
+        </div>
 
         <!--End::Main Portlet-->
     </div>
