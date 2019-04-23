@@ -48,7 +48,7 @@
                 <br><br>
                 <font size="4"><strong>  Plot: </strong>{{plot}}</font>
                 <br><br>
-                <font size="4"><strong>  BruhView Score: </strong>{{score}}</font>
+                <font size="4"><strong>  BruhView Score: </strong>{{bruhScore}}</font>
               </div>
             </div>
             </div>
@@ -71,15 +71,23 @@
                   <a onClick="location.href=location.href" class="btn btn-info"> Refresh</a>
   								<div class="m_datatable" id="json_data"></div>
   								<!--end: Datatable -->
+                  <label><strong>Add Score (1-10)</strong></label>
+                  <form  method="post" action="/add-score/{{movieid}}">
+                    <input id="Score" type="number" name="score" placeholder="1" min="1" max="10">
+                    <div class="m-portlet__foot m-portlet__foot--fit">
+                        <div class="m-form__actions">
+                          <button class="btn btn-primary">Send</button>
+                        </div>
+                    </div>
+                  </form>  
                   <label><strong>Add Review</strong></label>
                   <form  method="post" action="/add-review/{{movieid}}">
-                  <input id="Score" type="number" name="score" placeholder="1" min="1" max="10">
-                  <input id="SearchBar" type="text" class="form-control m-input m-input--square" name="review" placeholder="Enter Review Here">
-                  <div class="m-portlet__foot m-portlet__foot--fit">
-                      <div class="m-form__actions">
+                    <input id="SearchBar" type="text" class="form-control m-input m-input--square" name="review" placeholder="Enter Review Here">
+                    <div class="m-portlet__foot m-portlet__foot--fit">
+                        <div class="m-form__actions">
                           <button class="btn btn-primary">Send</button>
-                      </div>
-                  </div>
+                        </div>
+                    </div>
                   </form>
           </div>
           </div>
