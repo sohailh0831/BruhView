@@ -126,24 +126,25 @@ router.post('/add-review/:id', AuthenticationFunctions.ensureAuthenticated, (req
         return;
       }
       oldRate = parseInt(results[0].totalScore);
-      count = parseInt(results[0].numRate);
-    });
-
-    if (newRate > 10) {
-      newRate = 10;
-    } else if (newRate < 1) {
-      newRate = 1;
-    }
-    oldRate = oldRate + newRate;
-    count++;
-
-    con.query(`UPDATE movies SET totalScore = ${mysql.escape(oldRate)} WHERE movies.imdbID = ${mysql.escape(mov)};`, (error, results, fields) => {
-      if (error) {
-        console.log(error.stack);
-        con.end();
-        return;
+      count = results[0].numRate;
+      if (newRate > 10) {
+        newRate = 10;
+      } else if (newRate < 1) {
+        newRate = 1;
       }
+      oldRate = oldRate + newRate;
+      count++;
+      var rated = oldRate.toString()
+      con.query(`UPDATE movies SET totalScore = ${mysql.escape(rated)} WHERE movies.imdbID = ${mysql.escape(mov)};`, (error, results, fields) => {
+        if (error) {
+          console.log(error.stack);
+          con.end();
+          return;
+        }
+      });
     });
+
+    
     con.end();
     return res.redirect(`/movie/${mov}`);
     req.flash('success', 'Review Added');
