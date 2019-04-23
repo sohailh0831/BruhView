@@ -97,8 +97,30 @@ router.get('/dashboard',AuthenticationFunctions.ensureAuthenticated,(req, res) =
 
 router.get('/movie/:id', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
   console.log(`${req.params.id}`);
-
+  var bruhScore = 0;
   let con = mysql.createConnection(dbInfo);
+  //let con2 = mysql.createConnection(dbInfo);
+  con.query(`SELECT * FROM scores WHERE movieid=${mysql.escape(req.params.id)};`, (error, results, fields) => {
+    if (error) {
+      console.log(error.stack);
+      con.end();
+      return;
+    }
+    if(results.length == 0){
+      bruhScore = 0;
+    }
+    else{
+      var i;
+      for( i = 0; i < results.length; i++){
+        console.log(results[i].score);
+        bruhScore = bruhScore + results[i].score; 
+        console.log(bruhScore);
+      }
+      bruhScore = bruhScore/i;
+    }
+    
+    
+  });
   con.query(`SELECT * FROM movies WHERE imdbID=${mysql.escape(req.params.id)};`, (error, results, fields) => {
     if (error) {
       console.log(error.stack);
@@ -110,7 +132,8 @@ router.get('/movie/:id', AuthenticationFunctions.ensureAuthenticated, (req, res)
       req.flash('error', 'Movie ID has not been added to database yet');
       return res.redirect(`/dashboard`);
     }
-
+    
+    console.log(bruhScore);
     return res.render('platform/movie.hbs', {
       movieid: results[0].imdbID,
       title: results[0].title,
@@ -121,33 +144,76 @@ router.get('/movie/:id', AuthenticationFunctions.ensureAuthenticated, (req, res)
       plot: results[0].plot,
       error: req.flash('error'),
       success: req.flash('success'),
+      bruhScore: bruhScore,
     });
-
 
 
   });
 });
 
+router.post('/add-score/:id', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
+  var score = req.body.score;
+  var mov = req.params.id;
+  var curUser = req.user.identifier;
+
+  if (parseInt(score) > 10) {
+    score = "10";
+  }
+  else if (parseInt(score) < 1) {
+    score = "1";
+  }
+  let con = mysql.createConnection(dbInfo);
+
+  con.query(`SELECT * FROM scores WHERE movieid=${mysql.escape(mov)} AND userid=${mysql.escape(curUser)};`, (error, results, fields) => {
+    if (error) {
+      console.log(error.stack);
+      con.end();
+      return;
+    }
+    if (results.length == 0) { //No Score from user yet
+      con.query(`INSERT INTO scores (movieid, userid, score) VALUES (${mysql.escape(mov)}, ${mysql.escape(curUser)}, ${mysql.escape(score)});`, (error, results, fields) => {
+        if (error) {
+          console.log(error.stack);
+          con.end();
+          return;
+        }
+        con.end();
+        req.flash('success', 'Bruh Score Added');
+        return res.redirect(`/movie/${mov}`);
+      });
+    }
+    else { //Update score
+
+      con.query(`UPDATE scores SET score=${mysql.escape(score)} WHERE movieid=${mysql.escape(mov)} AND userid=${mysql.escape(curUser)};`, (error, results, fields) => {
+        if (error) {
+          console.log(error.stack);
+          con.end();
+          return;
+        }
+        con.end();
+        req.flash('success', 'Bruh Score Updated');
+        return res.redirect(`/movie/${mov}`);
+      });
+
+    }
+
+
+
+  });
+
+});
+
+
+
+
 router.post('/add-review/:id', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
   var user = req.user.username;
   var rev = req.body.review;
   var mov = req.params.id;
-  var oldRate;
-  var newRate = parseInt(req.body.score);
-  var count;
+
 
   let con = mysql.createConnection(dbInfo);
-  /*
-  con.query(`SELECT * FROM movies WHERE imdbID=${mysql.escape(mov)};`, (error, results, fields) => {
-    if (error) {
-        console.log(error.stack);
-        con.end();
-        return;
-    }
-    oldRate = response[0].totalScore;
-    count = response[0].numRate;
 
-  });*/
   con.query(`INSERT INTO reviews (movieid, review, username) VALUES (${mysql.escape(mov)}, ${mysql.escape(rev)}, ${mysql.escape(user)});`, (error, results, fields) => {
 
     if (error) {
@@ -155,32 +221,6 @@ router.post('/add-review/:id', AuthenticationFunctions.ensureAuthenticated, (req
       con.end();
       return;
     }
-
-    con.query(`SELECT * FROM movies WHERE imdbID=${mysql.escape(mov)};`, (error, results, fields) => {
-      if (error) {
-        console.log(error.stack);
-        con.end();
-        return;
-      }
-      oldRate = parseInt(results[0].totalScore);
-      count = parseInt(results[0].numRate);
-    });
-
-    if (newRate > 10) {
-      newRate = 10;
-    } else if (newRate < 1) {
-      newRate = 1;
-    }
-    oldRate = oldRate + newRate;
-    count++;
-
-    con.query(`UPDATE movies SET totalScore = ${mysql.escape(oldRate)} WHERE movies.imdbID = ${mysql.escape(mov)};`, (error, results, fields) => {
-      if (error) {
-        console.log(error.stack);
-        con.end();
-        return;
-      }
-    });
     con.end();
     return res.redirect(`/movie/${mov}`);
     req.flash('success', 'Review Added');
