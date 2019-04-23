@@ -5,7 +5,7 @@ const expressValidator = require('express-validator');
 const router = express.Router();
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const bcrypt= require('bcryptjs');
+const bcrypt = require('bcryptjs');
 const path = require('path');
 const flash = require('connect-flash');
 const exphbs = require('express-handlebars');
@@ -16,20 +16,20 @@ const mysql = require('mysql');
 const moment = require('moment');
 
 let dbInfo = {
-/*
-  host: "localhost",
-  user: "root",
-  password: "cs252project!",
-  database : 'BruhView'
-*/
+  /*
+    host: "localhost",
+    user: "root",
+    password: "cs252project!",
+    database : 'BruhView'
+  */
 
   connectionLimit: 100,
-   host:'134.209.4.10',
-   user:'root',
-   password:'cs252project!',
-   database:'BruhView',
-   port: 3306,
-   multipleStatements: true
+  host: '134.209.4.10',
+  user: 'root',
+  password: 'cs252project!',
+  database: 'BruhView',
+  port: 3306,
+  multipleStatements: true
 };
 
 const LocalStrategy = require('passport-local').Strategy;
@@ -44,8 +44,8 @@ router.get('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res)
 });
 */
 
-router.get('/',AuthenticationFunctions.ensureAuthenticated,(req, res) => {
-    return res.render('platform/dashboard.hbs', {
+router.get('/', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
+  return res.render('platform/dashboard.hbs', {
     error: req.flash('error'),
     success: req.flash('success'),
   });
@@ -95,165 +95,191 @@ router.get('/dashboard',AuthenticationFunctions.ensureAuthenticated,(req, res) =
     });
 });
 
-router.get('/movie/:id',AuthenticationFunctions.ensureAuthenticated,(req, res) => {
-    console.log(`${req.params.id}`);
+router.get('/movie/:id', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
+  console.log(`${req.params.id}`);
 
-    let con = mysql.createConnection(dbInfo);
-    con.query(`SELECT * FROM movies WHERE imdbID=${mysql.escape(req.params.id)};`, (error, results, fields) => {
-      if (error) {
-          console.log(error.stack);
-          con.end();
-          return;
-      }
+  let con = mysql.createConnection(dbInfo);
+  con.query(`SELECT * FROM movies WHERE imdbID=${mysql.escape(req.params.id)};`, (error, results, fields) => {
+    if (error) {
+      console.log(error.stack);
+      con.end();
+      return;
+    }
 
-      if (results.length === 0) {
-        req.flash('error', 'Movie ID has not been added to database yet');
-        return res.redirect(`/dashboard`);
-      }
+    if (results.length === 0) {
+      req.flash('error', 'Movie ID has not been added to database yet');
+      return res.redirect(`/dashboard`);
+    }
 
-      return res.render('platform/movie.hbs', {
+    return res.render('platform/movie.hbs', {
       movieid: results[0].imdbID,
       title: results[0].title,
-      genre:results[0].genre,
-      year:results[0].year,
-      director:results[0].director,
+      genre: results[0].genre,
+      year: results[0].year,
+      director: results[0].director,
       picture: results[0].pic,
-      plot : results[0].plot,
+      plot: results[0].plot,
       error: req.flash('error'),
       success: req.flash('success'),
     });
 
 
 
-    });
+  });
 });
 
 router.post('/add-review/:id', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
-    var user = req.user.username;
-    var rev = req.body.review;
-    var mov = req.params.id;
-    var oldRate;
-    var newRate = req.params.rate;
-    var count;
+  var user = req.user.username;
+  var rev = req.body.review;
+  var mov = req.params.id;
+  var oldRate;
+  var newRate = parseInt(req.body.score);
+  var count;
 
-    let con = mysql.createConnection(dbInfo);
-    /*
+  let con = mysql.createConnection(dbInfo);
+  /*
+  con.query(`SELECT * FROM movies WHERE imdbID=${mysql.escape(mov)};`, (error, results, fields) => {
+    if (error) {
+        console.log(error.stack);
+        con.end();
+        return;
+    }
+    oldRate = response[0].totalScore;
+    count = response[0].numRate;
+
+  });*/
+  con.query(`INSERT INTO reviews (movieid, review, username) VALUES (${mysql.escape(mov)}, ${mysql.escape(rev)}, ${mysql.escape(user)});`, (error, results, fields) => {
+
+    if (error) {
+      console.log(error.stack);
+      con.end();
+      return;
+    }
+
     con.query(`SELECT * FROM movies WHERE imdbID=${mysql.escape(mov)};`, (error, results, fields) => {
       if (error) {
-          console.log(error.stack);
-          con.end();
-          return;
+        console.log(error.stack);
+        con.end();
+        return;
       }
-      oldRate = response[0].totalScore;
-      count = response[0].numRate;
+      oldRate = parseInt(results[0].totalScore);
+      count = parseInt(results[0].numRate);
+    });
 
-    });*/
-    con.query(`INSERT INTO reviews (movieid, review, username) VALUES (${mysql.escape(mov)}, ${mysql.escape(rev)}, ${mysql.escape(user)});`, (error, results, fields) => {
+    if (newRate > 10) {
+      newRate = 10;
+    } else if (newRate < 1) {
+      newRate = 1;
+    }
+    oldRate = oldRate + newRate;
+    count++;
 
-                          if (error) {
-                              console.log(error.stack);
-                              con.end();
-                              return;
-                          }
-                          con.end();
-                          req.flash('success', 'Review Added');
-                          return res.redirect(`/movie/${mov}`);
-                          //return res.redirect('/searchresult');
-                      });
+    con.query(`UPDATE movies SET totalScore = ${mysql.escape(oldRate)} WHERE movies.imdbID = ${mysql.escape(mov)};`, (error, results, fields) => {
+      if (error) {
+        console.log(error.stack);
+        con.end();
+        return;
+      }
+    });
+    con.end();
+    return res.redirect(`/movie/${mov}`);
+    req.flash('success', 'Review Added');
+    //return res.redirect('/searchresult');
+  });
 
 });
 
 
 
-router.get('/reviews',AuthenticationFunctions.ensureAuthenticated,(req, res) => {
+router.get('/reviews', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
   return res.render('platform/reviews.hbs', {
-  error: req.flash('error'),
-  success: req.flash('success'),
-});
+    error: req.flash('error'),
+    success: req.flash('success'),
+  });
 });
 
 
 router.post('/dashboard', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
-    //ROUTER POST
-    let searchTitle = req.body.searchTitle;
+  //ROUTER POST
+  let searchTitle = req.body.searchTitle;
 
-    // Search movie requested by user
-    var start = "http://www.omdbapi.com/?t=";
-    var key = "&apikey=f0e99e3";
-    var apiSearchWithKey = start.concat(searchTitle, key);
-    console.log(apiSearchWithKey);
+  // Search movie requested by user
+  var start = "http://www.omdbapi.com/?t=";
+  var key = "&apikey=f0e99e3";
+  var apiSearchWithKey = start.concat(searchTitle, key);
+  console.log(apiSearchWithKey);
 
-    const request = require('request');
+  const request = require('request');
 
-    var obj;
-    var title;
-    var year;
-    var genre;
-    var director;
-    var imdbID;
-    var pic = "none";
+  var obj;
+  var title;
+  var year;
+  var genre;
+  var director;
+  var imdbID;
+  var pic = "none";
 
-    request(apiSearchWithKey, function (error, response, body) {
-        // Parse info
-        obj = JSON.parse(body);
-        title = obj.Title;
-        year = obj.Year;
-        genre = obj.Genre;
-        director = obj.Director;
-        imdbID = obj.imdbID;
-        pic = obj.Poster;
-        plot = obj.Plot;
+  request(apiSearchWithKey, function (error, response, body) {
+    // Parse info
+    obj = JSON.parse(body);
+    title = obj.Title;
+    year = obj.Year;
+    genre = obj.Genre;
+    director = obj.Director;
+    imdbID = obj.imdbID;
+    pic = obj.Poster;
+    plot = obj.Plot;
 
-        if(typeof imdbID == "undefined") {
-            console.log("IMDB API failed to find a movie with this title");
-            req.flash('error', 'IMDB API failed to find a movie with this title"');
-            return res.redirect('/dashboard');
-        }
+    if (typeof imdbID == "undefined") {
+      console.log("IMDB API failed to find a movie with this title");
+      req.flash('error', 'IMDB API failed to find a movie with this title"');
+      return res.redirect('/dashboard');
+    }
 
-        // Add API results to database
-        let con = mysql.createConnection(dbInfo);
-        // Check if movie already exists in database
-        con.query(`SELECT * FROM movies WHERE imdbID=${mysql.escape(imdbID)};`, (error, results, fields) => {
-            if (error) {
-                console.log(error.stack);
-                con.end();
-                return;
-            }
+    // Add API results to database
+    let con = mysql.createConnection(dbInfo);
+    // Check if movie already exists in database
+    con.query(`SELECT * FROM movies WHERE imdbID=${mysql.escape(imdbID)};`, (error, results, fields) => {
+      if (error) {
+        console.log(error.stack);
+        con.end();
+        return;
+      }
 
-            if (results.length === 0) {
-                // Make new movie
-                console.log('Movie does not already exist in database');
-                console.log(`${pic}`);
-                con.query(`INSERT INTO movies (imdbID, title, year, genre, director,pic,plot) VALUES (${mysql.escape(imdbID)}, ${mysql.escape(title)}, '${year}', ${mysql.escape(genre)}, ${mysql.escape(director)},${mysql.escape(pic)},${mysql.escape(plot)});`, (error, results, fields) => {
+      if (results.length === 0) {
+        // Make new movie
+        console.log('Movie does not already exist in database');
+        console.log(`${pic}`);
+        con.query(`INSERT INTO movies (imdbID, title, year, genre, director,pic,plot) VALUES (${mysql.escape(imdbID)}, ${mysql.escape(title)}, '${year}', ${mysql.escape(genre)}, ${mysql.escape(director)},${mysql.escape(pic)},${mysql.escape(plot)});`, (error, results, fields) => {
 
-                    if (error) {
-                        console.log(error.stack);
-                        con.end();
-                        return;
-                    }
+          if (error) {
+            console.log(error.stack);
+            con.end();
+            return;
+          }
 
-                    console.log(`${title} successfully added movie to database.`);
-                    con.end();
-                    return res.redirect(`/movie/${imdbID}`);
-                    req.flash('success', 'sucessfully added to database');
-                    //return res.redirect('/searchresult');
-                });
-            }
-            else {
-                return res.redirect(`/movie/${imdbID}`);
-            }
+          console.log(`${title} successfully added movie to database.`);
+          con.end();
+          return res.redirect(`/movie/${imdbID}`);
+          req.flash('success', 'sucessfully added to database');
+          //return res.redirect('/searchresult');
         });
-
+      }
+      else {
+        return res.redirect(`/movie/${imdbID}`);
+      }
     });
+
+  });
 });
 
 router.post('/categories/get-user-reviews/:id', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
   let con = mysql.createConnection(dbInfo);
   con.query(`SELECT * FROM reviews WHERE movieid=${mysql.escape(req.params.id)};`, (error, results, fields) => {
     if (error) {
-        console.log(error.stack);
-        con.end();
-        return res.send();
+      console.log(error.stack);
+      con.end();
+      return res.send();
     }
     con.end();
     res.send(results);
@@ -261,8 +287,8 @@ router.post('/categories/get-user-reviews/:id', AuthenticationFunctions.ensureAu
 });
 
 
-router.get('/login',AuthenticationFunctions.ensureNotAuthenticated, (req, res) => {
-    return res.render('platform/login.hbs', {
+router.get('/login', AuthenticationFunctions.ensureNotAuthenticated, (req, res) => {
+  return res.render('platform/login.hbs', {
     error: req.flash('error'),
     success: req.flash('success'),
   });
@@ -270,187 +296,187 @@ router.get('/login',AuthenticationFunctions.ensureNotAuthenticated, (req, res) =
 
 router.get('/searchresult', (req, res) => {
 
-    return res.render('platform/searchresult.hbs', {
-        error: req.flash('error'),
-        success: req.flash('success'),
-    });
+  return res.render('platform/searchresult.hbs', {
+    error: req.flash('error'),
+    success: req.flash('success'),
+  });
 });
 
 router.post('/searchresult', (req, res) => {
-    let memoinput = req.body.memoInput;
+  let memoinput = req.body.memoInput;
 
-    return res.render('platform/searchresult.hbs', {
-        error: req.flash('error'),
-        success: req.flash('success'),
-    });
+  return res.render('platform/searchresult.hbs', {
+    error: req.flash('error'),
+    success: req.flash('success'),
+  });
 });
 
 router.post('/login', AuthenticationFunctions.ensureNotAuthenticated, passport.authenticate('local', { successRedirect: '/dashboard', failureRedirect: '/login', failureFlash: true }), (req, res) => {
   res.redirect('/dashboard');
 });
 
-passport.use(new LocalStrategy({passReqToCallback: true,},
-	function (req, username, password, done) {
-      let con = mysql.createConnection(dbInfo);
-      con.query(`SELECT * FROM users WHERE username=${mysql.escape(username)};`, (error, results, fields) => {
-        if (error) {
-          console.log(error.stack);
+passport.use(new LocalStrategy({ passReqToCallback: true, },
+  function (req, username, password, done) {
+    let con = mysql.createConnection(dbInfo);
+    con.query(`SELECT * FROM users WHERE username=${mysql.escape(username)};`, (error, results, fields) => {
+      if (error) {
+        console.log(error.stack);
+        con.end();
+        return;
+      }
+      if (results.length === 0) {
+        con.end();
+        return done(null, false, req.flash('error', 'Username or Password is incorrect.'));
+      } else {
+        if (bcrypt.compareSync(password, results[0].password)) {
+          let user = {
+            identifier: results[0].id,
+            username: results[0].username,
+            firstName: results[0].firstname,
+            lastName: results[0].lastname,
+          };
           con.end();
-          return;
-        }
-        if (results.length === 0) {
+          return done(null, user);
+        } else {
           con.end();
           return done(null, false, req.flash('error', 'Username or Password is incorrect.'));
-        } else {
-            if (bcrypt.compareSync(password, results[0].password)) {
-              let user = {
-                  identifier: results[0].id,
-                  username: results[0].username,
-                  firstName: results[0].firstname,
-                  lastName: results[0].lastname,
-              };
-              con.end();
-              return done(null, user);
-            } else {
-              con.end();
-              return done(null, false, req.flash('error', 'Username or Password is incorrect.'));
-            }
-
         }
-      });
 
-}));
+      }
+    });
+
+  }));
 
 passport.serializeUser(function (uuid, done) {
-	done(null, uuid);
+  done(null, uuid);
 });
 
 passport.deserializeUser(function (uuid, done) {
   done(null, uuid);
 });
 
-router.get('/settings', AuthenticationFunctions.ensureAuthenticated,(req, res) => {
+router.get('/settings', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
   let con = mysql.createConnection(dbInfo);
 
-    con.query(`SELECT * FROM users WHERE id=${mysql.escape(req.user.identifier)};`, (error, user, fields) => {
-      if (error) {
-          console.log(error.stack);
-          con.end();
-          return res.send();
-      }
+  con.query(`SELECT * FROM users WHERE id=${mysql.escape(req.user.identifier)};`, (error, user, fields) => {
+    if (error) {
+      console.log(error.stack);
       con.end();
-      console.log(user)
-      return res.render('platform/settings.hbs', {
-        username: user[0].username,
-        firstName: user[0].firstname,
-        lastName : user[0].lastname,
-      });
+      return res.send();
+    }
+    con.end();
+    console.log(user)
+    return res.render('platform/settings.hbs', {
+      username: user[0].username,
+      firstName: user[0].firstname,
+      lastName: user[0].lastname,
     });
+  });
 });
 
-router.get('/register', AuthenticationFunctions.ensureNotAuthenticated,(req, res) => {
-    return res.render('platform/register.hbs', {
+router.get('/register', AuthenticationFunctions.ensureNotAuthenticated, (req, res) => {
+  return res.render('platform/register.hbs', {
     error: req.flash('error'),
     success: req.flash('success'),
   });
 });
 
 
-router.get('/sampleinput', AuthenticationFunctions.ensureAuthenticated,(req, res) => {
+router.get('/sampleinput', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
   let con = mysql.createConnection(dbInfo);
 
-    con.query(`SELECT * FROM users WHERE id=${mysql.escape(req.user.identifier)};`, (error, user, fields) => {
-      if (error) {
-          console.log(error.stack);
-          con.end();
-          return res.send();
-      }
+  con.query(`SELECT * FROM users WHERE id=${mysql.escape(req.user.identifier)};`, (error, user, fields) => {
+    if (error) {
+      console.log(error.stack);
       con.end();
-      return res.render('platform/sampleinput.hbs', {
-        testin: user[0].testInput,
-      });
+      return res.send();
+    }
+    con.end();
+    return res.render('platform/sampleinput.hbs', {
+      testin: user[0].testInput,
     });
+  });
 });
 
-router.post('/sampleinput', AuthenticationFunctions.ensureAuthenticated,(req, res) => {
+router.post('/sampleinput', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
   let con = mysql.createConnection(dbInfo);
 
   let t = req.body.testInput;
   con.query(`UPDATE users SET testInput = ${mysql.escape(t)} WHERE users.id = ${mysql.escape(req.user.identifier)};`, (error, results, fields) => {
-  if (error) {
+    if (error) {
       console.log(error.stack);
       con.end();
       return res.send();
-  }
-  con.end();
-  req.flash('success', 'test input successfully updated!!');
-  return res.redirect('/sampleinput');
+    }
+    con.end();
+    req.flash('success', 'test input successfully updated!!');
+    return res.redirect('/sampleinput');
   });
 
 
 });
 
 
-router.get('/registeradmin', AuthenticationFunctions.ensureAuthenticated,(req, res) => {
-    return res.render('platform/registeradmin.hbs', {
+router.get('/registeradmin', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
+  return res.render('platform/registeradmin.hbs', {
     error: req.flash('error'),
     success: req.flash('success'),
   });
 });
 
-router.post('/register',AuthenticationFunctions.ensureNotAuthenticated,(req,res)=>{
+router.post('/register', AuthenticationFunctions.ensureNotAuthenticated, (req, res) => {
   let firstname = req.body.firstname;
   let lastname = req.body.lastname;
   let username = req.body.username;
   let password = req.body.password;
 
-    req.checkBody('firstname', 'First Name field is required.').notEmpty();
-    req.checkBody('lastname', 'Last Name field is required.').notEmpty();
-    req.checkBody('username', 'Username field is required.').notEmpty();
-    req.checkBody('password', 'New Password field is required.').notEmpty();
-    req.checkBody('repassword', 'Confirm New password field is required.').notEmpty();
-	  req.checkBody('repassword', 'New password does not match confirmation password field.').equals(req.body.password);
+  req.checkBody('firstname', 'First Name field is required.').notEmpty();
+  req.checkBody('lastname', 'Last Name field is required.').notEmpty();
+  req.checkBody('username', 'Username field is required.').notEmpty();
+  req.checkBody('password', 'New Password field is required.').notEmpty();
+  req.checkBody('repassword', 'Confirm New password field is required.').notEmpty();
+  req.checkBody('repassword', 'New password does not match confirmation password field.').equals(req.body.password);
 
-    let formErrors = req.validationErrors();
-      if (formErrors) {
-  		    req.flash('error', formErrors[0].msg);
+  let formErrors = req.validationErrors();
+  if (formErrors) {
+    req.flash('error', formErrors[0].msg);
+    return res.redirect('/register');
+  }
+
+  let con = mysql.createConnection(dbInfo);
+  con.query(`SELECT * FROM users WHERE username=${mysql.escape(req.body.username)};`, (error, results, fields) => { //checks to see if username is already taken
+    if (error) {
+      console.log(error.stack);
+      con.end();
+      return res.send();
+    }
+
+    if (results.length == 0) {
+      let userid = uuidv4();
+      let salt = bcrypt.genSaltSync(10);
+      let hashedPassword = bcrypt.hashSync(req.body.password, salt);
+      con.query(`INSERT INTO users (id,username, password, firstname, lastname) VALUES (${mysql.escape(userid)}, ${mysql.escape(username)}, '${hashedPassword}', ${mysql.escape(req.body.firstname)}, ${mysql.escape(req.body.lastname)});`, (error, results, fields) => {
+        if (error) {
+          console.log(error.stack);
+          con.end();
+          return;
+        }
+        if (results) {
+          console.log(`${req.body.email} successfully registered.`);
+          con.end();
+          req.flash('success', 'Successfully registered. You may now login.');
+          return res.redirect('/login');
+        }
+        else {
+          con.end();
+          req.flash('error', 'Something Went Wrong. Try Registering Again.');
           return res.redirect('/register');
-  	  }
-
-      let con = mysql.createConnection(dbInfo);
-      con.query(`SELECT * FROM users WHERE username=${mysql.escape(req.body.username)};`, (error, results, fields) => { //checks to see if username is already taken
-          if (error) {
-            console.log(error.stack);
-            con.end();
-            return res.send();
-          }
-
-          if(results.length == 0){
-          let userid = uuidv4();
-          let salt = bcrypt.genSaltSync(10);
-          let hashedPassword = bcrypt.hashSync(req.body.password,salt);
-          con.query(`INSERT INTO users (id,username, password, firstname, lastname) VALUES (${mysql.escape(userid)}, ${mysql.escape(username)}, '${hashedPassword}', ${mysql.escape(req.body.firstname)}, ${mysql.escape(req.body.lastname)});`, (error, results, fields) => {
-            if (error) {
-            console.log(error.stack);
-            con.end();
-            return;
-          }
-          if (results) {
-            console.log(`${req.body.email} successfully registered.`);
-            con.end();
-            req.flash('success', 'Successfully registered. You may now login.');
-            return res.redirect('/login');
-          }
-          else {
-            con.end();
-            req.flash('error', 'Something Went Wrong. Try Registering Again.');
-            return res.redirect('/register');
-          }
+        }
 
 
       });
     }
-    else{
+    else {
       con.end();
       req.flash('error', 'Username is already taken');
       return res.redirect('/register');
@@ -458,7 +484,7 @@ router.post('/register',AuthenticationFunctions.ensureNotAuthenticated,(req,res)
     }
 
 
-    }); //initial query
+  }); //initial query
 
 
 });
@@ -466,79 +492,79 @@ router.post('/register',AuthenticationFunctions.ensureNotAuthenticated,(req,res)
 
 
 
-router.post('/registeradmin',AuthenticationFunctions.ensureAuthenticated,(req,res)=>{
+router.post('/registeradmin', AuthenticationFunctions.ensureAuthenticated, (req, res) => {
   let firstname = req.body.firstname;
   let lastname = req.body.lastname;
   let username = req.body.username;
   let password = req.body.password;
 
-    req.checkBody('firstname', 'First Name field is required.').notEmpty();
-    req.checkBody('lastname', 'Last Name field is required.').notEmpty();
-    req.checkBody('username', 'Username field is required.').notEmpty();
-    req.checkBody('password', 'New Password field is required.').notEmpty();
-    req.checkBody('repassword', 'Confirm New password field is required.').notEmpty();
-	  req.checkBody('repassword', 'New password does not match confirmation password field.').equals(req.body.password);
+  req.checkBody('firstname', 'First Name field is required.').notEmpty();
+  req.checkBody('lastname', 'Last Name field is required.').notEmpty();
+  req.checkBody('username', 'Username field is required.').notEmpty();
+  req.checkBody('password', 'New Password field is required.').notEmpty();
+  req.checkBody('repassword', 'Confirm New password field is required.').notEmpty();
+  req.checkBody('repassword', 'New password does not match confirmation password field.').equals(req.body.password);
 
-    let formErrors = req.validationErrors();
-      if (formErrors) {
-  		    req.flash('error', formErrors[0].msg);
-          return res.redirect('/registeradmin');
-  	  }
+  let formErrors = req.validationErrors();
+  if (formErrors) {
+    req.flash('error', formErrors[0].msg);
+    return res.redirect('/registeradmin');
+  }
 
-      let con = mysql.createConnection(dbInfo);
-      con.query(`SELECT * FROM users WHERE id=${mysql.escape(req.user.identifier)};`,(error,results,fields) =>{
+  let con = mysql.createConnection(dbInfo);
+  con.query(`SELECT * FROM users WHERE id=${mysql.escape(req.user.identifier)};`, (error, results, fields) => {
+    if (error) {
+      console.log(error.stack);
+      con.end();
+      return res.send();
+    }
+    if (results[0].admin != '1') {
+      con.end();
+      req.flash('error', 'Only Admin Accounts can add Admin Accounts.');
+      return res.redirect('/dashboard');
+    }
+    else {
+      con.query(`SELECT * FROM users WHERE username=${mysql.escape(req.body.username)};`, (error, results, fields) => { //checks to see if username is already taken
         if (error) {
           console.log(error.stack);
           con.end();
           return res.send();
         }
-   if(results[0].admin != '1'){
-          con.end();
-          req.flash('error', 'Only Admin Accounts can add Admin Accounts.');
-          return res.redirect('/dashboard');
-        }
-    else{
-      con.query(`SELECT * FROM users WHERE username=${mysql.escape(req.body.username)};`, (error, results, fields) => { //checks to see if username is already taken
-          if (error) {
-            console.log(error.stack);
-            con.end();
-            return res.send();
-          }
 
-          if(results.length == 0){
+        if (results.length == 0) {
           let userid = uuidv4();
           let salt = bcrypt.genSaltSync(10);
-          let hashedPassword = bcrypt.hashSync(req.body.password,salt);
+          let hashedPassword = bcrypt.hashSync(req.body.password, salt);
           con.query(`INSERT INTO users (id,username, password, firstname, lastname,admin) VALUES (${mysql.escape(userid)}, ${mysql.escape(username)}, '${hashedPassword}', ${mysql.escape(req.body.firstname)}, ${mysql.escape(req.body.lastname)},${mysql.escape('1')});`, (error, results, fields) => {
             if (error) {
-            console.log(error.stack);
-            con.end();
-            return;
-          }
-          if (results) {
-            console.log(`${req.body.email} successfully registered.`);
-            con.end();
-            req.flash('success', 'Successfully registered Admin Account.');
-            return res.redirect('/login');
-          }
-          else {
-            con.end();
-            req.flash('error', 'Something Went Wrong. Try Registering Again.');
-            return res.redirect('/registeradmin');
-          }
+              console.log(error.stack);
+              con.end();
+              return;
+            }
+            if (results) {
+              console.log(`${req.body.email} successfully registered.`);
+              con.end();
+              req.flash('success', 'Successfully registered Admin Account.');
+              return res.redirect('/login');
+            }
+            else {
+              con.end();
+              req.flash('error', 'Something Went Wrong. Try Registering Again.');
+              return res.redirect('/registeradmin');
+            }
 
 
-      });
+          });
+        }
+        else {
+          con.end();
+          req.flash('error', 'Username is already taken');
+          return res.redirect('/registeradmin');
+
+        }
+      }); //initial query
     }
-    else{
-      con.end();
-      req.flash('error', 'Username is already taken');
-      return res.redirect('/registeradmin');
-
-    }
-    }); //initial query
-}
-        });
+  });
 });
 
 
