@@ -134,7 +134,7 @@ router.post('/add-review/:id', AuthenticationFunctions.ensureAuthenticated, (req
       }
       oldRate = oldRate + newRate;
       count++;
-      var rated = oldRate.toString()
+      var rated = oldRate.toString();
       con.query(`UPDATE movies SET totalScore = ${mysql.escape(rated)} WHERE movies.imdbID = ${mysql.escape(mov)};`, (error, results, fields) => {
         if (error) {
           console.log(error.stack);
